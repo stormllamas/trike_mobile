@@ -1,0 +1,7 @@
+import React, { createRef } from 'react';
+
+export const navigationRef = createRef();
+
+export const rootNavigation = (name, params) => {
+  navigationRef.current?.navigate(name, params);
+}
