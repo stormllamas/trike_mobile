@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types'
+// import PropTypes from 'prop-types'
 
 import { styles } from '../common/Styles'
 
@@ -39,9 +39,9 @@ const Intro = ({
   )
 }
 
-Intro.propTypes = {
-  reroute: PropTypes.func.isRequired,
-}
+// Intro.propTypes = {
+//   reroute: PropTypes.func.isRequired,
+// }
 
 const mapStateToProps = state => ({
   auth: state.auth,

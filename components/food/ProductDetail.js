@@ -6,8 +6,8 @@ import { useBackButton } from '../common/BackButtonHandler';
 import FoodCart from './FoodCart'
 import RestaurantProduct from './RestaurantProduct'
 
-import { Icon, Text, Button, Radio, RadioGroup } from '@ui-kitten/components';
-import { Dimensions, View, Image, StyleSheet, ScrollView, ImageBackground } from 'react-native'
+import { Layout, Icon, Text, Button, Radio, RadioGroup } from '@ui-kitten/components';
+import { Dimensions, View, Image, StyleSheet, ScrollView, ImageBackground, Alert } from 'react-native'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -53,8 +53,32 @@ const ProductDetail = ({
   const [foodCartActive, setFoodCartActive] = useState(false)
 
   const [selectedVariant, setSelectedVariant] = useState('')
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState('')
 
   const carouselRef = useRef()
+
+  const addToOrder = () => {
+    if (selectedVariant !== '') {
+      addOrderItem({
+        productId: selectedVariant,
+        sellerID: product.seller.id
+      })
+      console.log(selectedVariant)
+      console.log(product.seller.id)
+    } else {
+      Alert.alert(
+        "Error",
+        "Please Select a Variant",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          { text: "OK" }
+        ]
+      );
+    }
+  }
 
   const handleBackButtonClick = () => {
     if (foodCartActive) {
@@ -139,16 +163,16 @@ const ProductDetail = ({
               <Text category="h6" style={{ fontWeight: '400' }}>Select a Variant</Text>
               {product.variants.length > 0 ? (
                 <RadioGroup
-                  selectedIndex={selectedVariant}
-                  onChange={index => setSelectedVariant(index)}>
+                  selectedIndex={selectedVariantIndex}
+                  onChange={index => {setSelectedVariantIndex(index), setSelectedVariant(product.variants[index].id)}}>
                   {product.variants.map((variant, index) => (
-                    <Radio status="success" key={variant.id} >{variant.name}</Radio>
+                    <Radio key={variant.id} ><Text>₱ {variant.final_price} - {variant.name}</Text></Radio>
                   ))}
                 </RadioGroup>
               ) : undefined}
             </View>
           </ScrollView>
-          <Button style={styles.addToCartButton}>Add To Cart</Button>
+          <Button style={styles.addToCartButton} onPress={() => addToOrder()}>Add To Cart</Button>
           {isAuthenticated && !user.groups.includes('rider') && !currentOrderLoading && currentOrder !== null && currentOrder.order_type === 'food' && currentOrder.order_items.length > 0 ? (
             <Ionicons style={styles.foodCartButton} name="cart" size={28} color={"#ffffff"} onPress={() => setFoodCartActive(!foodCartActive)}/>
           ) : undefined}

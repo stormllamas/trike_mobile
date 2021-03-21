@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types'
+// import PropTypes from 'prop-types'
 
 import { Icon, Layout, Text, Card, Autocomplete, AutocompleteItem, Spinner } from '@ui-kitten/components';
 import { BackHandler, Animated, Easing, Dimensions, StyleSheet, View, Image, FlatList, TouchableOpacity } from 'react-native'
@@ -109,16 +109,6 @@ const Food = ({
   return (
     <>
       <Header subtitle='Food' sideMenu={true}/>
-      {/* <MapView
-        style={{ flex: 1 }}
-        // provider={PROVIDER_GOOGLE}
-        showsUserLocation
-        initialRegion={{
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421}}
-      /> */}
       <Layout style={{ paddingHorizontal: 10 }} level="1">
         <Autocomplete
           placeholder='Search for a Restaurant'
@@ -234,15 +224,15 @@ const foodStyles = StyleSheet.create({
   },
 })
 
-Food.propTypes = {
-  getCategories: PropTypes.func.isRequired,
-  getSellers: PropTypes.func.isRequired,
-  getAllSellers: PropTypes.func.isRequired,
-  setCuisine: PropTypes.func.isRequired,
-  clearCuisine: PropTypes.func.isRequired,
-  setKeywords: PropTypes.func.isRequired,
-  clearKeywords: PropTypes.func.isRequired,
-}
+// Food.propTypes = {
+//   getCategories: PropTypes.func.isRequired,
+//   getSellers: PropTypes.func.isRequired,
+//   getAllSellers: PropTypes.func.isRequired,
+//   setCuisine: PropTypes.func.isRequired,
+//   clearCuisine: PropTypes.func.isRequired,
+//   setKeywords: PropTypes.func.isRequired,
+//   clearKeywords: PropTypes.func.isRequired,
+// }
 
 const mapStateToProps = state => ({
   auth: state.auth,

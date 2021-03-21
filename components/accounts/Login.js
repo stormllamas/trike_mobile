@@ -3,7 +3,7 @@ import { default as theme } from '../../custom-theme.json';
 import * as eva from '@eva-design/eva';
 
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types'
+// import PropTypes from 'prop-types'
 
 import { Icon, Layout, Text, Button, Card, Input } from '@ui-kitten/components';
 import { LogBox, Dimensions, StyleSheet, Image, ScrollView, SafeAreaView, View, FlatList, TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
@@ -123,11 +123,11 @@ const styles = StyleSheet.create({
   }
 })
 
-Login.propTypes = {
-  login: PropTypes.func.isRequired,
-  socialSignin: PropTypes.func.isRequired,
-  reroute: PropTypes.func.isRequired,
-}
+// Login.propTypes = {
+//   login: PropTypes.func.isRequired,
+//   socialSignin: PropTypes.func.isRequired,
+//   reroute: PropTypes.func.isRequired,
+// }
 
 const mapStateToProps = state => ({
   auth: state.auth,

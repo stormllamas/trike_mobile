@@ -279,7 +279,7 @@ export const updateUser = body => async (dispatch, getState) => {
 }
 
 export const addAddress = body => async (dispatch, getState) => {
-  dispatch({ type: USER_LOADING });
+  // dispatch({ type: USER_LOADING });
 
   try {
     const res = await axios.post(`${trikeURL}/api/auth/address/`, body, tokenConfig(getState))
@@ -304,7 +304,7 @@ export const getAddress = id => async (dispatch, getState) => {
 }
 
 export const updateAddressName = body => async (dispatch, getState) => {
-  dispatch({ type: USER_LOADING });
+  // dispatch({ type: USER_LOADING });
   try {
     const res = await axios.put(`${trikeURL}/api/auth/address/${body.id}/`, body, tokenConfig(getState))
     dispatch({ 
@@ -317,7 +317,7 @@ export const updateAddressName = body => async (dispatch, getState) => {
 }
 
 export const deleteAddress = id => async (dispatch, getState) => {
-  dispatch({ type: USER_LOADING });
+  // dispatch({ type: USER_LOADING });
 
   try {
     const res = await axios.delete(`${trikeURL}/api/auth/address/${id}/`, tokenConfig(getState))

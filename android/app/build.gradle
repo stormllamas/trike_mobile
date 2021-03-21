@@ -130,9 +130,9 @@ android {
 
     defaultConfig {
         applicationId "com.trikeapp"
-        minSdkVersion 16
+        minSdkVersion 23
         // minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion 26
+        targetSdkVersion 29
         // targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
@@ -179,6 +179,9 @@ android {
             }
 
         }
+    }
+    lintOptions {
+        abortOnError false
     }
 }
 

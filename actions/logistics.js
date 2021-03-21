@@ -311,16 +311,17 @@ export const addOrderItem = ({ productId, sellerID }) => async (dispatch, getSta
   }
   try {
     const res = await axios.post(`${trikeURL}/api/order_item/`, body, tokenConfig(getState))
+    console.log(res.data)
     await dispatch(getCurrentOrder({
       type: 'food',
       query: `?order_seller=${sellerID}`,
       updateOnly: true
     }));
-    M.toast({
-      html: res.data.msg,
-      displayLength: 3500,
-      classes: res.data.class,
-    });
+    // M.toast({
+    //   html: res.data.msg,
+    //   displayLength: 3500,
+    //   classes: res.data.class,
+    // });
   } catch (err) {
     dispatch({ type: AUTH_ERROR});
   }

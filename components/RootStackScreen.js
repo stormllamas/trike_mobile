@@ -137,11 +137,12 @@ const Root = ({
             onSelect={index => setSelectedMenuIndex(index)}>
             <MenuItem title='Home' accessoryLeft={() => <Ionicons size={22} name='home-outline'/>}/>
             <MenuItem title='My Bookings' accessoryLeft={() => <Ionicons size={22} name='cube-outline'/>}/>
-            <MenuGroup title='Account Controls'>
+            {/* <MenuGroup title='Account Controls'> */}
+              <MenuItem title='Account Controls'/>
               <MenuItem title='My Profile' accessoryLeft={() => <Ionicons size={22} name='person-circle-outline'/>} onPress={() => navigation.navigate('Profile')}/>
               <MenuItem title='Security' accessoryLeft={() => <Ionicons size={22} name='shield-outline'/>}/>
               <MenuItem title='Logout' accessoryLeft={() => <Ionicons size={22} name='log-out-outline'/>}/>
-            </MenuGroup>
+            {/* </MenuGroup> */}
           </Menu>
         </>
       </Animated.View>

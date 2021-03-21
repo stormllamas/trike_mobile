@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 // import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import axios from 'axios';
-// import { GOOGLE_API_KEY } from "@env"
+import { GOOGLE_API_KEY } from "@env"
 
 import { Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation } from '@ui-kitten/components';
 import { Animated, Easing, Dimensions, View, TouchableHighlight, Image, StyleSheet, ScrollView } from 'react-native'
@@ -99,7 +99,7 @@ const FoodCart = ({
     const destination = `${addressInfo.latitude},${addressInfo.longitude}`;
   
     try {
-      const res = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${'AIzaSyBi8DvnA6CTed6XFHBnbXggQG1Ry7YhktA'}`)
+      const res = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${GOOGLE_API_KEY}`)
       if (res.data.status === 'OK' && res.data.rows[0].elements[0].distance) {
         const distanceString = res.data.rows[0].elements[0].distance.text
         const distanceValue = res.data.rows[0].elements[0].distance.value
