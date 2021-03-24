@@ -49,7 +49,6 @@ export const login = ({email, password}) => async dispatch => {
 
   try {
     const res = await axios.post(`${trikeURL}/api/auth/login`, body)
-    console.log(res.data)
     if (res.data.status === 'ok') {
       dispatch({
         type: LOGIN_SUCCESS,

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { BackHandler, Animated, Easing, Dimensions, View, Image, TouchableWithoutFeedback } from 'react-native'
+import { BackHandler } from 'react-native'
 
 
 export const useBackButton = (handler) => {

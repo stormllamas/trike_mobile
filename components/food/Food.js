@@ -109,6 +109,7 @@ const Food = ({
   return (
     <>
       <Header subtitle='Food' sideMenu={true}/>
+      
       <Layout style={{ paddingHorizontal: 10 }} level="1">
         <Autocomplete
           placeholder='Search for a Restaurant'
@@ -159,6 +160,11 @@ const Food = ({
             {sellers.results.map((item, index) => (
               <RestaurantItem key={item.id} seller={item} sellers={sellers} index={index} sellersLoading={sellersLoading} styles={styles} navigation={navigation}/>
             ))}
+            {moreSellersLoading ? (
+              <Layout level="3" style={{ flex: 1, alignItems: 'center', padding: 10 }}>
+                <Spinner size='medium'></Spinner>
+              </Layout>
+            ) : undefined}
           </IOScrollView>
         ) : (
           <FlatList
@@ -179,11 +185,6 @@ const Food = ({
           />
         )}
       </Layout>
-      {moreSellersLoading ? (
-        <Layout level="2" style={{ alignItems: 'center', padding: 10 }}>
-          <Spinner size='medium'></Spinner>
-        </Layout>
-      ) : undefined}
     </>
   )
 }
@@ -203,20 +204,20 @@ const foodStyles = StyleSheet.create({
     borderBottomWidth: 0,
     borderLeftWidth: 0,
     margin: 5,
-    width: (deviceWidth/3.33)-10,
-    height: 150,
+    width: (deviceWidth/4)-10,
+    height: 110,
     borderRadius: 15,
   },
   categoryHeader: {
-    width: (deviceWidth/3.33)-10,
+    width: (deviceWidth/4)-10,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   categoryImage: {
     borderRadius: 100,
-    width: (deviceWidth/3.33)-30,
-    height: (deviceWidth/3.33)-30
+    width: (deviceWidth/4)-30,
+    height: (deviceWidth/4)-30
   },
   sliderText: {
     marginTop: 5,

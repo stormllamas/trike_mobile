@@ -174,12 +174,12 @@ const RestaurantDetail = ({
                 productsPlaceholder(placeholderRange)
               )}
             </Layout>
+            {moreProductsLoading ? (
+              <Layout level="2" style={{ alignItems: 'center', padding: 10 }}>
+                <Spinner size='medium'></Spinner>
+              </Layout>
+            ) : undefined}
           </IOScrollView>
-          {moreProductsLoading ? (
-            <Layout level="2" style={{ alignItems: 'center', padding: 10 }}>
-              <Spinner size='medium'></Spinner>
-            </Layout>
-          ) : undefined}
           {/* <div id="cartmodal" className="modal bottom-sheet full-height">
             <a className="modal-action modal-close cancel"><i className="material-icons grey-text">close</i></a>
             <FoodCart seller={seller}/>

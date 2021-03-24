@@ -127,7 +127,7 @@ const ProductDetail = ({
                 <Carousel
                   ref={carouselRef}
                   data={productImages}
-                  renderItem={({item , index}) =>(
+                  renderItem={({item , index}) => (
                     <Image style={styles.productImage} source={{ uri: `https://www.trike.com.ph${item}`}}></Image>
                   )}
                   sliderWidth={Dimensions.get('window').width}
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     width: (deviceWidth/1),
   },
   thumbnailsOverlay: {
-    height: 240,
+    flex: 1,
     width: 'auto',
     backgroundColor: 'rgba(0, 0, 0, 0.10)',
     alignItems: 'center',
@@ -209,7 +209,8 @@ const styles = StyleSheet.create({
     height: 230,
     width: 300,
     marginTop: 10,
-    borderRadius: 15
+    borderRadius: 15,
+    backgroundColor: '#ffffff'
   },
   productVariants: {
     padding: 15,

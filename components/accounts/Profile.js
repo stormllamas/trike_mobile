@@ -1,12 +1,13 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { connect } from 'react-redux';
 import axios from 'axios';
-// import PropTypes from 'prop-types'
+import PropTypes from 'prop-types'
 
-import { Icon, Text, Button, Spinner, Input, Modal, Card, Select, SelectItem, Divider, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
-import { Animated, Easing, Dimensions, View, StyleSheet, ScrollView } from 'react-native'
-import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import { Icon, Text, Button, Spinner, Input, Modal, Card, Divider, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
+import { Keyboard, Animated, Easing, Dimensions, View, StyleSheet, ScrollView } from 'react-native'
+import MapView, { PROVIDER_GOOGLE, AnimatedRegion, Marker } from 'react-native-maps';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 import { GOOGLE_API_KEY } from "@env"
 
@@ -21,6 +22,8 @@ import { styles } from '../common/Styles'
 
 import { addAddress, deleteAddress, getAddress, updateUser, updateAddressName, reroute } from '../../actions/auth'
 
+// navigator.geolocation = require(GEOLOCATION_PACKAGE)
+
 
 const Profile = ({
   auth: { userLoading, user, isAuthenticated },
@@ -30,43 +33,76 @@ const Profile = ({
   reroute,
   navigation
 }) => {
+  
 
-  const [editingProfile, setEditingProfile] = useState(false);
+  // Loading State
   const [updatingUser, setUpdatingUser] = useState(false);
-  
-  const [searchBox, setSearchBox] = useState(''); 
-  
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [address, setAddress] = useState('');
-  const [addressName, setAddressName] = useState('');
-  const [addressNameModal, setAddressNameModal] = useState(false);
 
-  const [selectedAddress, setSelectedAddress] = useState('');
-  const [selectedAddressName, setSelectedAddressName] = useState('');
-
+  // State for user update
+  const [editingProfile, setEditingProfile] = useState(false);
   const [firstName, setFirstName] = useState(user ? (user.first_name ? user.first_name : '') : '');
   const [lastName, setLastName] = useState(user ? (user.last_name ? user.last_name : '') : '');
   const [contact, setContact] = useState(user ? (user.contact ? user.contact : '') : '');
   const [gender, setGender] = useState(user ? (user.gender ? user.gender : '') : '');
-
-  const [modalAnim, setModalAnim] = useState(new Animated.Value(Dimensions.get('window').height))
-  const [addressmodalActive, setAddressmodalActive] = useState(false)
   
-  const locationGeocode = async (latLng) => {
-    console.log(latLng)
+  // States for new address
+  const [addressmodalActive, setAddressmodalActive] = useState(false)
+  const [modalAnim, setModalAnim] = useState(new Animated.Value(Dimensions.get('window').height))
+
+  const [marker, setMarker] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [address, setAddress] = useState('');
+  const [addressName, setAddressName] = useState('');
+
+  // States for AutoComplete
+  const [keyboardActive, setKeyboardActive] = useState('');
+  const [autoCompleteText, setAutoCompleteText] = useState('');
+  const [autoCompleteFocused, setAutoCompleteFocused] = useState('');
+
+  // States for updating address
+  const [addressNameModal, setAddressNameModal] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState('');
+  const [selectedAddressName, setSelectedAddressName] = useState('');
+
+  const ref = useRef();
+
+  const locationGeocode = async ({latLng, placeId}) => {
     try {
-      const res = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.lat},${latLng.lng}&key=${GOOGLE_API_KEY}`)
-      
-      for (let i=0; i < res.data.results.length; i++) {
-        console.log(res.data.results[i].formatted_address)
-        if (!res.data.results[i].formatted_address.includes('Unnamed Road')) {
-          setAddress(res.data.results[i].formatted_address)
-          break
+      if(latLng) {
+        const res = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.lat},${latLng.lng}&key=${GOOGLE_API_KEY}`)
+        
+        for (let i=0; i < res.data.results.length; i++) {
+          if (!res.data.results[i].formatted_address.includes('Unnamed Road')) {
+            console.log('lg lat', res.data.results[i])
+            console.log('lg lat', res.data.results[i].geometry.location.lat)
+            console.log('lg lng', res.data.results[i].geometry.location.lat)
+            setLatitude(res.data.results[i].geometry.location.lat)
+            setLongitude(res.data.results[i].geometry.location.lng)
+            setAddress(res.data.results[i].formatted_address)
+            setAutoCompleteText(res.data.results[i].formatted_address)
+            ref.current?.setAddressText(res.data.results[i].formatted_address)
+            ref.current?.blur()
+            break
+          }
+        }
+      } else if(placeId) {
+        const res = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`)
+        
+        for (let i=0; i < res.data.results.length; i++) {
+          if (!res.data.results[i].formatted_address.includes('Unnamed Road')) {
+            setLatitude(res.data.results[i].geometry.location.lat)
+            setLongitude(res.data.results[i].geometry.location.lng)
+            setAddress(res.data.results[i].formatted_address)
+            setAutoCompleteText(res.data.results[i].formatted_address)
+            ref.current?.setAddressText(res.data.results[i].formatted_address)
+            ref.current?.blur()
+            break
+          }
         }
       }
     } catch (err) {
-      console.log('error', err.data)
+      console.log('error', err)
     }
   }
 
@@ -130,6 +166,20 @@ const Profile = ({
     setGender(user.gender)
     setEditingProfile(false)
   }
+
+  useEffect(() => {
+    Keyboard.addListener('keyboardDidShow', () => setKeyboardActive(true));
+    Keyboard.addListener('keyboardDidHide', () => setKeyboardActive(false));
+  
+    return () => {
+      Keyboard.removeListener('keyboardDidShow', () => setKeyboardActive(true))
+      Keyboard.removeListener('keyboardDidHide', () => setKeyboardActive(false))
+    }
+  }, [])
+
+  useEffect(() => {
+    console.log(ref.current.getAddressText())
+  }, [ref])
   
   useEffect(() => {
     if (addressmodalActive) {
@@ -251,45 +301,97 @@ const Profile = ({
           </ScrollView>
           
           <Animated.View style={[styles.superModal, { top: modalAnim }]}>
-            <>
-              <TopNavigation
-                accessoryLeft={() => <TopNavigationAction onPress={() => setAddressmodalActive(false)} icon={props => <Icon {...props} name='arrow-back'/>}/>}
-                title={`Add address`}
-              />
-              <MapView
-                style={{ flex: 1 }}
-                provider={PROVIDER_GOOGLE}
-                showsUserLocation={true}
-                initialRegion={{
-                  latitude: 13.946958175958924,
-                  longitude: 121.61064815344236,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421
-                }}
-                customMapStyle={['c90416c7434e6e52']}
-                onPress={e => {
-                  let lat = e.nativeEvent.coordinate.latitude
-                  let lng = e.nativeEvent.coordinate.longitude
-                  locationGeocode({ lat, lng })
-                  setLatitude(lat)
-                  setLongitude(lng)
-                }}
-              >
+            <TopNavigation
+              accessoryLeft={() => <TopNavigationAction onPress={() => setAddressmodalActive(false)} icon={props => <Icon {...props} name='arrow-back'/>}/>}
+              title={`Add address`}
+            />
+            <GooglePlacesAutocomplete
+              ref={ref}
+              placeholder='Search'
+              onPress={(data) => {
+                locationGeocode({ placeId: data.place_id })
+              }}
+              query={{
+                key: GOOGLE_API_KEY,
+                language: 'en',
+              }}
+              textInputProps={{
+                onFocus: () => setAutoCompleteFocused(true),
+                onBlur: () => setAutoCompleteFocused(false),
+                onChangeText: e => setAutoCompleteText(e)
+              }}
+              // currentLocation={true}
+              // currentLocationLabel='Current location'
+              styles={{
+                container: {
+                  maxHeight: keyboardActive && autoCompleteText.length >= 1 && autoCompleteFocused ? null : 50,
+                  borderTopWidth: 1,
+                  borderRadius: 0,
+                  borderColor: "#E7EAED",
+                },
+                textInputContainer: {
+                  paddingRight: 35
+                  // backgroundColor: 'grey',
+                  // borderRadius: 0
+                },
+                textInput: {
+                  height: 45,
+                  color: '#5d5d5d',
+                  fontSize: 16,
+                  borderRadius: 0,
+                  // borderBottomWidth: 1,
+                },
+                listView: {
+                  position: 'absolute',
+                  top: 45,
+                  left: 0,
+                  border: 0,
+                  backgroundColor: 'grey',
+                }
+                
+              }}
+            ><Ionicons name="close-circle" size={22} color={ '#ECECEC' } style={{ position: 'absolute', zIndex: 9, right: 12, top: 12 }} onPress={() => {ref.current?.setAddressText(''), setAutoCompleteText('')}}/></GooglePlacesAutocomplete>
+            
+            <MapView
+              style={{ flex: 1 }}
+              provider={PROVIDER_GOOGLE}
+              showsUserLocation={true}
+              initialRegion={{
+                latitude: 13.946958175958924,
+                longitude: 121.61064815344236,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421
+              }}
+              // customMapStyle={['c90416c7434e6e52']}
+              onPress={e => {
+                let lat = e.nativeEvent.coordinate.latitude
+                let lng = e.nativeEvent.coordinate.longitude
+                locationGeocode({ latLng: { lat, lng } })
+              }}
+            >
+              {latitude && longitude ? (
                 <Marker
-                  // pinColor={'blue'}
+                  pinColor={'#0095FF'}
+                  onDragEnd={e => {
+                    let lat = e.nativeEvent.coordinate.latitude
+                    let lng = e.nativeEvent.coordinate.longitude
+                    locationGeocode({ latLng: { lat, lng } })
+                  }}
                   draggable
-                  coordinate={{ latitude: 13.946958175958924, longitude: 121.61064815344236 }}
+                  coordinate={{ latitude: latitude, longitude: longitude }}
                   title={ 'Delivery' }
                 />
-              </MapView>
-              <Button
-                // style={profileModalStyles.checkoutButton}
-                // disabled={currentOrder.count < 1 || address === '' || !delivery || !lastName || !firstName || !contact || !email ? true : false}
-                onPress={() => addNewAddress(false)}
-              >
-                ADD ADDRESS
-              </Button>
-            </>
+              ) : (
+                <></>
+              )}
+            </MapView>
+            <Button
+              style={{ marginBottom: 20 }}
+              disabled={!longitude || !latitude ? true : false}
+              onPress={() => addNewAddress(false)}
+            >
+              ADD ADDRESS
+            </Button>
           </Animated.View>
           <Modal
             visible={addressNameModal}
@@ -329,17 +431,17 @@ const profileStyles = StyleSheet.create({
     borderWidth: 1,
     padding: 15,
     paddingRight: 40
-  }
+  },
 })
 
-// Profile.propTypes = {
-//   reroute: PropTypes.func.isRequired,
-//   addAddress: PropTypes.func.isRequired,
-//   deleteAddress: PropTypes.func.isRequired,
-//   getAddress: PropTypes.func.isRequired,
-//   updateAddressName: PropTypes.func.isRequired,
-//   updateUser: PropTypes.func.isRequired,
-// }
+Profile.propTypes = {
+  reroute: PropTypes.func.isRequired,
+  addAddress: PropTypes.func.isRequired,
+  deleteAddress: PropTypes.func.isRequired,
+  getAddress: PropTypes.func.isRequired,
+  updateAddressName: PropTypes.func.isRequired,
+  updateUser: PropTypes.func.isRequired,
+}
 
 const mapStateToProps = state => ({
   auth: state.auth,
