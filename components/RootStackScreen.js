@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types'
 
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -20,6 +21,7 @@ import BottomTabs from './layout/BottomTabs'
 const RootStack = createStackNavigator();
 
 const Root = ({
+  siteConfig: {sideBarToggled},
   setMenuToggler,
   navigation
 }) => {
@@ -106,8 +108,12 @@ const Root = ({
 
 
   useEffect(() => {
-    setMenuToggler(setMenuActive)
+    setMenuToggler(false)
   }, []);
+
+  useEffect(() => {
+    setMenuActive(sideBarToggled)
+  }, [sideBarToggled]);
 
   const trikeURL = 'https://www.trike.com.ph'
 
@@ -155,7 +161,12 @@ const Root = ({
   )
 }
 
+Root.protoTypes = {
+  setMenuToggler: PropTypes.func.isRequired,
+}
+
 const mapStateToProps = state => ({
+  siteConfig: state.siteConfig
 });
 
 export default connect(mapStateToProps, { setMenuToggler })(Root);

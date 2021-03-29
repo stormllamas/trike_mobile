@@ -286,6 +286,7 @@ export const addAddress = body => async (dispatch, getState) => {
       type: ADDRESS_ADDED,
       payload: res.data
     })
+    return res.data
   } catch (err) {
     dispatch({ type: AUTH_ERROR })
   }

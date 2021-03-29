@@ -4,7 +4,7 @@ const initialState = {
   siteInfo: null,
   siteInfoLoading: true,
 
-  sideBarToggler: null,
+  sideBarToggled: null,
 }
 
 export default (state = initialState, action) => {
@@ -25,7 +25,7 @@ export default (state = initialState, action) => {
     case SET_SIDEBAR_TOGGLER:
       return {
         ...state,
-        sideBarToggler: action.payload
+        sideBarToggled: action.payload
       }
     
     default:

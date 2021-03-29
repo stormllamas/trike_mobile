@@ -1,22 +1,19 @@
 import React, { useEffect, useState, Fragment } from 'react';
 
 import { connect } from 'react-redux';
-// import PropTypes from 'prop-types'
+import PropTypes from 'prop-types'
 
 import { Icon, Layout, Text, Card, Autocomplete, AutocompleteItem, Spinner } from '@ui-kitten/components';
-import { BackHandler, Animated, Easing, Dimensions, StyleSheet, View, Image, FlatList, TouchableOpacity } from 'react-native'
+import { Dimensions, StyleSheet, View, Image, FlatList, TouchableOpacity } from 'react-native'
 
 import { IOScrollView } from 'react-native-intersection-observer'
 
 import { styles } from '../common/Styles'
 
-// import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
-// import {Client} from "@googlemaps/google-maps-services-js";
-
 import Header from '../layout/Header'
 import RestaurantItem from './RestaurantItem'
 
-import { getCategories, getAllSellers, getSellers, setCuisine, clearCuisine, setKeywords, clearKeywords } from '../../actions/logistics'
+import { getCategories, getAllSellers, getSellers, setCuisine, setKeywords } from '../../actions/logistics'
 
 const Food = ({
   logistics: {
@@ -29,10 +26,9 @@ const Food = ({
 
     cuisineFilter, keywordsFilter
   },
-  auth: {current, all_subjects},
   getCategories, getSellers, getAllSellers,
-  setCuisine, clearCuisine,
-  setKeywords, clearKeywords,
+  setCuisine,
+  setKeywords,
 
   navigation
 }) => {
@@ -94,22 +90,12 @@ const Food = ({
     // setSearch(keywordsFilter)
   }, [cuisineFilter, keywordsFilter]);
 
-  useEffect(() => {
-    // if (sellers.results.length < 1) {
-      getSellers({
-        getMore: false,
-      })
-    // }
-    // setSearch(keywordsFilter)
-  }, [allSellersLoading]);
-
   const placeholderRange = [...Array(4).keys()];
   const productRange = [...Array(8).keys()];
 
   return (
     <>
       <Header subtitle='Food' sideMenu={true}/>
-      
       <Layout style={{ paddingHorizontal: 10 }} level="1">
         <Autocomplete
           placeholder='Search for a Restaurant'
@@ -154,7 +140,7 @@ const Food = ({
           />
         )}
       </Layout>
-      <Layout style={styles.shoppingCardsWrapper} level="3">
+      <Layout style={styles.shoppingCardsWrapper} level="2">
         {!sellersLoading && sellers ? (
           <IOScrollView contentContainerStyle={styles.shoppingCardsContainer}>
             {sellers.results.map((item, index) => (
@@ -204,12 +190,12 @@ const foodStyles = StyleSheet.create({
     borderBottomWidth: 0,
     borderLeftWidth: 0,
     margin: 5,
-    width: (deviceWidth/4)-10,
+    width: (deviceWidth/4)-20,
     height: 110,
     borderRadius: 15,
   },
   categoryHeader: {
-    width: (deviceWidth/4)-10,
+    width: (deviceWidth/4)-20,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -225,19 +211,17 @@ const foodStyles = StyleSheet.create({
   },
 })
 
-// Food.propTypes = {
-//   getCategories: PropTypes.func.isRequired,
-//   getSellers: PropTypes.func.isRequired,
-//   getAllSellers: PropTypes.func.isRequired,
-//   setCuisine: PropTypes.func.isRequired,
-//   clearCuisine: PropTypes.func.isRequired,
-//   setKeywords: PropTypes.func.isRequired,
-//   clearKeywords: PropTypes.func.isRequired,
-// }
+Food.propTypes = {
+  getCategories: PropTypes.func.isRequired,
+  getSellers: PropTypes.func.isRequired,
+  getAllSellers: PropTypes.func.isRequired,
+  setCuisine: PropTypes.func.isRequired,
+  setKeywords: PropTypes.func.isRequired,
+}
 
 const mapStateToProps = state => ({
   auth: state.auth,
   logistics: state.logistics,
 });
 
-export default connect(mapStateToProps, { getCategories, getSellers, getAllSellers, setCuisine, clearCuisine, setKeywords, clearKeywords })(Food);
+export default connect(mapStateToProps, { getCategories, getSellers, getAllSellers, setCuisine, setKeywords })(Food);

@@ -28,6 +28,7 @@ import BottomTabs from './components/layout/BottomTabs'
 
 import RestaurantDetail from './components/food/RestaurantDetail'
 import ProductDetail from './components/food/ProductDetail'
+import FoodPayment from './components/food/FoodPayment'
 
 import { loadUser } from './actions/auth'
 import { loadSite } from './actions/siteConfig'
@@ -72,6 +73,11 @@ const App = () => {
               name="ProductDetail"
               component={ProductDetail}
               options={{selectedSeller: 'selectedSeller', selectedProduct: 'selectedProduct'}}
+            />
+            <Stack.Screen
+              name="FoodPayment"
+              component={FoodPayment}
+              options={{selectedSeller: 'selectedSeller'}}
             />
           </Stack.Navigator>
         </NavigationContainer>

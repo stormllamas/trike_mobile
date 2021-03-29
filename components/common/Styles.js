@@ -46,7 +46,31 @@ export const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 50,
   },
-
+  mute: {
+    color: '#959595'
+  },
+  small: {
+    fontSize: 12
+  },
+  label: {
+    color: '#959595',
+    fontSize: 12,
+    paddingTop: 10
+  },
+  inputSummary: {
+    backgroundColor: '#EAECF1',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 5,
+    color: '#6A6A6A'
+  },
+  boxWithShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,  
+    elevation: 5
+  },
   // Shopping Card List
   shoppingCardsWrapper: {
     flex:1,
@@ -81,6 +105,24 @@ export const styles = StyleSheet.create({
   shoppingCardImage: {
     height: 150,
     width: (deviceWidth/2)-18
+  },
+
+  // Food Cart
+  foodCartButton: {
+    width: 55,
+    height: 53.5,
+    paddingRight: 1.5,
+    position: 'absolute',
+    bottom: 15,
+    right: 18,
+    zIndex: 2,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#398d3c',
+    borderColor: '#398d3c',
+    borderRadius: 100,
   },
 
   // Order Item List

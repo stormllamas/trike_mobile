@@ -1,18 +1,19 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react'
-// import PropTypes from 'prop-types'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import { useBackButton } from '../common/BackButtonHandler';
 
 import FoodCart from './FoodCart'
 import RestaurantProduct from './RestaurantProduct'
 
-import { Layout, Icon, Text, Button, Radio, RadioGroup } from '@ui-kitten/components';
+import { Layout, Icon, Text, Button, Radio, RadioGroup, Spinner } from '@ui-kitten/components';
 import { Dimensions, View, Image, StyleSheet, ScrollView, ImageBackground, Alert } from 'react-native'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
 
 import Header from '../layout/Header'
+import { styles } from '../common/Styles'
 
 import { getProduct, addOrderItem } from '../../actions/logistics'
 
@@ -57,6 +58,17 @@ const ProductDetail = ({
 
   const carouselRef = useRef()
 
+  const handleBackButtonClick = () => {
+    if (foodCartActive) {
+      setFoodCartActive(false)
+      return true;
+    } else {
+      navigation.goBack()
+      return true
+    }
+  }
+  useBackButton(handleBackButtonClick)
+
   const addToOrder = () => {
     if (selectedVariant !== '') {
       addOrderItem({
@@ -80,23 +92,15 @@ const ProductDetail = ({
     }
   }
 
-  const handleBackButtonClick = () => {
-    if (foodCartActive) {
-      setFoodCartActive(false)
-      return true;
-    } else {
-      navigation.goBack()
-      return true
-    }
-  }
-  useBackButton(handleBackButtonClick)
-
   useEffect(() => {
     getProduct({
       productQuery: route.params.selectedProduct,
       sellerQuery: route.params.selectedSeller
     })
     setRendered(true)
+    return () => {
+      setRendered(true)
+    };
   }, []);
 
   useEffect(() => {
@@ -121,14 +125,14 @@ const ProductDetail = ({
               resizeMode='cover'
               blurRadius={8}
               source={{ uri: `https://www.trike.com.ph${product.seller.thumbnail}` }}
-              style={styles.imagesBackground}
+              style={productDetailsStyles.imagesBackground}
             >
-              <View style={styles.thumbnailsOverlay}>
+              <View style={productDetailsStyles.thumbnailsOverlay}>
                 <Carousel
                   ref={carouselRef}
                   data={productImages}
                   renderItem={({item , index}) => (
-                    <Image style={styles.productImage} source={{ uri: `https://www.trike.com.ph${item}`}}></Image>
+                    <Image style={productDetailsStyles.productImage} source={{ uri: `https://www.trike.com.ph${item}`}}></Image>
                   )}
                   sliderWidth={Dimensions.get('window').width}
                   itemWidth={300}
@@ -157,7 +161,7 @@ const ProductDetail = ({
                 tappableDots={true}
               />
             </ImageBackground>
-            <View style={styles.productVariants}>
+            <View style={productDetailsStyles.productVariants}>
               <Text category="h6" style={{ fontWeight: '700' }}>{product.name}</Text>
               <Text style={{ fontSize: 16, marginBottom: 20 }}>{product.seller.name}</Text>
               <Text category="h6" style={{ fontWeight: '400' }}>Select a Variant</Text>
@@ -172,25 +176,31 @@ const ProductDetail = ({
               ) : undefined}
             </View>
           </ScrollView>
-          <Button style={styles.addToCartButton} onPress={() => addToOrder()}>Add To Cart</Button>
+          <Button style={productDetailsStyles.addToCartButton} onPress={() => addToOrder()}>Add To Cart</Button>
           {isAuthenticated && !user.groups.includes('rider') && !currentOrderLoading && currentOrder !== null && currentOrder.order_type === 'food' && currentOrder.order_items.length > 0 ? (
             <Ionicons style={styles.foodCartButton} name="cart" size={28} color={"#ffffff"} onPress={() => setFoodCartActive(!foodCartActive)}/>
           ) : undefined}
-          <FoodCart seller={product.seller} foodCartActive={foodCartActive} setFoodCartActive={setFoodCartActive}/>
+          <FoodCart seller={product.seller} foodCartActive={foodCartActive} setFoodCartActive={setFoodCartActive} navigation={navigation} />
         </>
       ) : (
         <>
           <Text>Not Found</Text>
         </>
       )
-    ) : <></>
+    ) : (
+      <>
+        <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
+          <Spinner size='large'/>
+        </View>
+      </>
+    )
   )
 }
 
 let deviceWidth = Dimensions.get('window').width
 let deviceHeight = Dimensions.get('window').height
 
-const styles = StyleSheet.create({
+const productDetailsStyles = StyleSheet.create({
   productImages: {
     padding: 15,
   },
@@ -214,7 +224,7 @@ const styles = StyleSheet.create({
   },
   productVariants: {
     padding: 15,
-    paddingBottom: 75
+    paddingBottom: 40
   },
   addToCart: {
     borderWidth: 1,
@@ -226,36 +236,12 @@ const styles = StyleSheet.create({
     borderColor: '#398d3c',
     borderRadius: 0
   },
-  foodCartButton: {
-    width: 55,
-    height: 53.5,
-    paddingRight: 1.5,
-    position: 'absolute',
-    bottom: 60,
-    right: 18,
-    zIndex: 2,
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#388D3D',
-    borderColor: '#388D3D',
-    borderRadius: 100,
-  },
-  superModal: {
-    position: 'absolute',
-    height: deviceHeight,
-    width: deviceWidth,
-    padding: 0,
-    zIndex: 10,
-    backgroundColor: '#ffffff'
-  },
 })
 
-// ProductDetail.propTypes = {
-//   getProduct: PropTypes.func.isRequired,
-//   addOrderItem: PropTypes.func.isRequired,
-// }
+ProductDetail.propTypes = {
+  getProduct: PropTypes.func.isRequired,
+  addOrderItem: PropTypes.func.isRequired,
+}
 
 const mapStateToProps = state => ({
   auth: state.auth,

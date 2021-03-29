@@ -1,10 +1,10 @@
 import React, { Fragment, useEffect, useState } from 'react'
-// import PropTypes from 'prop-types'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 
 import { useBackButton } from '../common/BackButtonHandler';
 
-// import FoodCart from './FoodCart'
+import FoodCart from './FoodCart'
 import RestaurantProduct from './RestaurantProduct'
 
 import { Icon, Layout, Text, Card, Autocomplete, AutocompleteItem, Spinner, Divider, Tab, TabBar } from '@ui-kitten/components';
@@ -34,6 +34,7 @@ const productsPlaceholder = (placeholderRange) => (
 )
 
 const RestaurantDetail = ({
+  auth: { isAuthenticated, user },
   logistics: { 
     currentOrderLoading,
     currentOrder,
@@ -53,14 +54,21 @@ const RestaurantDetail = ({
   setCourse
 }) => {
 
-  const handleBackButtonClick = () => {
-    navigation.goBack()
-    return false
-  }
-  useBackButton(handleBackButtonClick)
-
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [rendered, setRendered] = useState(false)
+
+  const [foodCartActive, setFoodCartActive] = useState(false)
+
+  const handleBackButtonClick = () => {
+    if (foodCartActive) {
+      setFoodCartActive(false)
+      return true;
+    } else {
+      navigation.goBack()
+      return true
+    }
+  }
+  useBackButton(handleBackButtonClick)
 
   const tabSelected = (index) => {
     setSelectedIndex(index);
@@ -145,7 +153,7 @@ const RestaurantDetail = ({
                 horizontal={true}
                 data={seller.features}
                 renderItem={({ item }) => (
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => navigation.navigate('ProductDetail', { selectedProduct: item.name, selectedSeller: item.seller.name })}>
                     <View key={item.id} style={restaurantDetailStyles.featureWrapper}>
                       <Image style={restaurantDetailStyles.featureImage} source={{ uri: `https://www.trike.com.ph${item.thumbnail}` }} />
                       <Text style={restaurantDetailStyles.featureText}>{item.name}</Text>
@@ -155,7 +163,7 @@ const RestaurantDetail = ({
                 keyExtractor={feature => feature.id.toString()}
               />
             </Layout>
-            <Layout level="2" style={{ flexDirection: 'row', flexWrap: 'wrap', paddingTop: 6 }}>
+            <Layout level="2" style={{ flexDirection: 'row', flexWrap: 'wrap', paddingTop: 6, paddingBottom: 75 }}>
               {!productsLoading ? (
                 products.results.length > 0 ? (
                   products.results[0].seller.name == route.params.selectedSeller ? (
@@ -180,10 +188,10 @@ const RestaurantDetail = ({
               </Layout>
             ) : undefined}
           </IOScrollView>
-          {/* <div id="cartmodal" className="modal bottom-sheet full-height">
-            <a className="modal-action modal-close cancel"><i className="material-icons grey-text">close</i></a>
-            <FoodCart seller={seller}/>
-          </div> */}
+          {isAuthenticated && !user.groups.includes('rider') && !currentOrderLoading && currentOrder !== null && currentOrder.order_type === 'food' && currentOrder.order_items.length > 0 ? (
+            <Ionicons style={styles.foodCartButton} name="cart" size={28} color={"#ffffff"} onPress={() => setFoodCartActive(!foodCartActive)}/>
+          ) : undefined}
+          <FoodCart seller={seller} foodCartActive={foodCartActive} setFoodCartActive={setFoodCartActive} navigation={navigation}/>
         </>
       ) : (
         <>
@@ -212,14 +220,15 @@ const restaurantDetailStyles = StyleSheet.create({
   },
 })
 
-// RestaurantDetail.propTypes = {
-//   getSeller: PropTypes.func.isRequired,
-//   getProducts: PropTypes.func.isRequired,
-//   setCourse: PropTypes.func.isRequired,
-// }
+RestaurantDetail.propTypes = {
+  getSeller: PropTypes.func.isRequired,
+  getProducts: PropTypes.func.isRequired,
+  setCourse: PropTypes.func.isRequired,
+}
 
 const mapStateToProps = state => ({
   logistics: state.logistics,
+  auth: state.auth,
 });
 
 export default connect(mapStateToProps, { getSeller, getProducts, setCourse })(RestaurantDetail);

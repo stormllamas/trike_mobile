@@ -408,8 +408,8 @@ export const cancelOrder = ({ id }) => async (dispatch, getState) => {
 }
 
 
-export const foodCheckout = ({ formData, orderSeller, history }) => async (dispatch, getState) => {
-  dispatch({ type: CHECKOUT_LOADING })
+export const foodCheckout = ({ formData, orderSeller, navigation }) => async (dispatch, getState) => {
+  // dispatch({ type: CHECKOUT_LOADING })
   try {
     const orderBody = {
       // user: getState().auth.user.id,
@@ -437,14 +437,9 @@ export const foodCheckout = ({ formData, orderSeller, history }) => async (dispa
     const res = await axios.put(`${trikeURL}/api/food_checkout/${orderSeller.id}/`, orderBody, tokenConfig(getState))
     if (res.data.status === "okay") {
       dispatch({ type: CHECKOUT_SUCCESS })
-      history.push(`/food/order_payment/${orderSeller.name}`)
+      navigation.navigate('FoodPayment', { selectedSeller: orderSeller.name })
     } else {
       dispatch({ type: CHECKOUT_FAILED })
-      M.toast({
-        html: res.data.msg,
-        displayLength: 3500,
-        classes: 'red',
-      });
       await dispatch(getCurrentOrder({
         type: 'food',
         query: `?order_seller=${orderSeller.id}`,

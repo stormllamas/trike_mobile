@@ -30,7 +30,7 @@ const BottomTabs = ({
         onSelect={index => onTabSelect(index)}>
         <BottomNavigationTab icon={props => <FontAwesome name="cutlery" size={20} color={selectedIndex == 0 ? "#FBA535":"#909CB4"}/>} title='FOOD'/>
         <BottomNavigationTab icon={props => <FontAwesome name="truck" size={20} color={selectedIndex == 1 ? "#FBA535":"#909CB4"}/>} title='DELIVERY'/>
-        <BottomNavigationTab icon={props => <FontAwesome name="motorcycle" size={20} color={selectedIndex == 2 ? "#FBA535":"#909CB4"}/>} title='RIDE HAIL'/>
+        {/* <BottomNavigationTab icon={props => <FontAwesome name="motorcycle" size={20} color={selectedIndex == 2 ? "#FBA535":"#909CB4"}/>} title='RIDE HAIL'/> */}
       </BottomNavigation>
     </Layout>
   )

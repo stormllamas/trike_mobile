@@ -44,6 +44,7 @@ const FoodCart = ({
   deleteOrderItem,
   getAddress,
   foodCheckout,
+  navigation,
 }) => {
   const [delivery, setDelivery] = useState("");
 
@@ -121,11 +122,12 @@ const FoodCart = ({
 
   const proceedToPayments = async e => {
     e.preventDefault();
-    console.log(description)
-    if(currentOrder.count < 1 || address === '' || !delivery || !lastName || !firstName || !contact || !email ? false : true) {
+
+    if(currentOrder.count < 1 && address === '' && !delivery && !lastName && !firstName && !contact && !email ? false : true) {
       const formData = {
         vehicleChoice: siteInfo.vehicles.filter(vehicle => vehicle.name === 'motorcycle')[0].id,
-        firstName, lastName, contact, email, gender,
+        firstName, lastName, contact, email,
+        gender: selectedGenderIndex === 0 ? 'male' : 'female',
         pickupLat, pickupLng, pickupAddress,
         deliveryLat, deliveryLng, deliveryAddress,
         distanceText, distanceValue, durationText, durationValue,
@@ -133,7 +135,7 @@ const FoodCart = ({
       }
       await foodCheckout({
         formData,
-        history: history,
+        navigation: navigation,
         orderSeller: seller
       })
     }
@@ -201,7 +203,7 @@ const FoodCart = ({
               currentOrder.order_items.length > 0 ? (
                 <>
                   <ScrollView>
-                    <View style={{ borderTopWidth: 8, borderColor: '#E6E4E4' }}>
+                    <View style={{ borderTopWidth: 8, borderColor: '#EAECF1' }}>
                       <TouchableHighlight onPress={() => setPersonalDetailsActivated(!personalDetailsActivated)}>
                         <View style={styles.collapsibleHeader}>
                           <Text category="h6" style={{ fontWeight: '700', fontSize: 16 }}>Personal Details</Text>
@@ -251,10 +253,10 @@ const FoodCart = ({
                       </Collapsible>
                     </View>
 
-                    <View style={{ borderTopWidth: 8, borderColor: '#E6E4E4'  }}>
+                    <View style={{ borderTopWidth: 8, borderColor: '#EAECF1'  }}>
                       <TouchableHighlight onPress={() => setAddressDetailsActivated(!addressDetailsActivated)}>
                         <View style={styles.collapsibleHeader}>
-                          <Text category="h6" style={{ fontWeight: '700', fontSize: 16 }}>Delivery Address</Text>
+                          <Text category="h6" style={{ fontWeight: '700', fontSize: 16 }}>Delivery Details</Text>
                           <Ionicons name={addressDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
                         </View>
                       </TouchableHighlight>
@@ -271,11 +273,20 @@ const FoodCart = ({
                               ))
                             )}
                           </Select>
+                          <Input
+                            value={description}
+                            label='Description'
+                            multiline={true}
+                            textStyle={{ minHeight: 85, textAlignVertical : 'top' }}
+                            placeholder='Leave us some notes'
+                            onChangeText={nextValue => setDescription(nextValue)}
+                            style={{ backgroundColor: 'white' }}
+                          />
                         </View>
                       </Collapsible>
                     </View>
 
-                    <View style={{ borderTopWidth: 8, borderColor: '#E6E4E4', backgroundColor: 'white', padding: 10 }}>
+                    <View style={{ borderTopWidth: 8, borderColor: '#EAECF1', backgroundColor: 'white', padding: 10 }}>
                       <Text category="h6" style={{ fontWeight: '700', marginTop: 10, marginBottom: 10, fontSize: 16 }}>Items</Text>
                       {currentOrder.order_items !== undefined && (
                         currentOrder.order_items.map(orderItem => (
@@ -332,6 +343,7 @@ let deviceHeight = Dimensions.get('window').height
 
 const foodCardStyles = StyleSheet.create({
   checkoutButton: {
+    marginBottom: 25,
     width: deviceWidth,
     backgroundColor: '#398d3c',
     borderColor: '#398d3c',
@@ -341,15 +353,9 @@ const foodCardStyles = StyleSheet.create({
   checkoutFloatText: {
     position: 'absolute',
     color: 'white',
-    bottom: 15,
+    bottom: 35,
     right: 25,
     zIndex: 10
-  },
-  noProduct: {
-    width: (deviceWidth/1),
-    height: (deviceWidth/1),
-    alignItems: 'center',
-    justifyContent: 'center'
   },
 })
 

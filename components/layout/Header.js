@@ -1,18 +1,14 @@
 import React, { useEffect, useState, Fragment } from 'react';
-import { default as theme } from '../../custom-theme.json';
-import * as eva from '@eva-design/eva';
+import PropTypes from 'prop-types'
 
 import { connect } from 'react-redux';
-import { Icon, MenuItem, OverflowMenu, TopNavigation, TopNavigationAction, Text, Button } from '@ui-kitten/components';
-import { BackHandler, View, StyleSheet, FlatList, Alert, Image } from 'react-native'
+import { Icon, MenuItem, OverflowMenu, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 
 import { logout } from '../../actions/auth'
-
-import { styles } from '../common/Styles'
+import { setMenuToggler } from '../../actions/siteConfig'
 
 const Header = ({
-  auth: {current, all_subjects},
-  siteConfig: {sideBarToggler},
+  siteConfig: {sideBarToggled}, setMenuToggler,
   logout,
   backLink,
   subtitle,
@@ -44,7 +40,7 @@ const Header = ({
         <TopNavigationAction icon={props => <Icon {...props} name='arrow-back' onPress={() => navigation.navigate(backLinkComponent, backLinkOptions)}/>}/>
       ) : (
         sideMenu ? (
-          <TopNavigationAction icon={props => <Icon {...props} name='menu-outline' onPress={() => sideBarToggler(true)}/>}/>
+          <TopNavigationAction icon={props => <Icon {...props} name='menu-outline' onPress={() => setMenuToggler(!sideBarToggled)}/>}/>
         ) : (
           <TopNavigationAction icon={props => <Icon {...props} name='arrow-back' onPress={() => navigation.goBack()}/>}/>
         )
@@ -66,9 +62,13 @@ const Header = ({
   )
 }
 
+Header.propTypes = {
+  logout: PropTypes.func.isRequired,
+  setMenuToggler: PropTypes.func.isRequired,
+}
+
 const mapStateToProps = state => ({
-  auth: state.auth,
   siteConfig: state.siteConfig,
 });
 
-export default connect(mapStateToProps, {logout})(Header);
+export default connect(mapStateToProps, {logout, setMenuToggler})(Header);

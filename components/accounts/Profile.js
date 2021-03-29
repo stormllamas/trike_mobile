@@ -6,8 +6,11 @@ import PropTypes from 'prop-types'
 
 import { Icon, Text, Button, Spinner, Input, Modal, Card, Divider, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 import { Keyboard, Animated, Easing, Dimensions, View, StyleSheet, ScrollView } from 'react-native'
+
 import MapView, { PROVIDER_GOOGLE, AnimatedRegion, Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import Geolocation from 'react-native-geolocation-service'
+navigator.geolocation = require('react-native-geolocation-service');
 
 import { GOOGLE_API_KEY } from "@env"
 
@@ -22,8 +25,6 @@ import { styles } from '../common/Styles'
 
 import { addAddress, deleteAddress, getAddress, updateUser, updateAddressName, reroute } from '../../actions/auth'
 
-// navigator.geolocation = require(GEOLOCATION_PACKAGE)
-
 
 const Profile = ({
   auth: { userLoading, user, isAuthenticated },
@@ -33,7 +34,6 @@ const Profile = ({
   reroute,
   navigation
 }) => {
-  
 
   // Loading State
   const [updatingUser, setUpdatingUser] = useState(false);
@@ -49,7 +49,6 @@ const Profile = ({
   const [addressmodalActive, setAddressmodalActive] = useState(false)
   const [modalAnim, setModalAnim] = useState(new Animated.Value(Dimensions.get('window').height))
 
-  const [marker, setMarker] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [address, setAddress] = useState('');
@@ -66,6 +65,7 @@ const Profile = ({
   const [selectedAddressName, setSelectedAddressName] = useState('');
 
   const ref = useRef();
+  const mapRef = useRef();
 
   const locationGeocode = async ({latLng, placeId}) => {
     try {
@@ -74,11 +74,8 @@ const Profile = ({
         
         for (let i=0; i < res.data.results.length; i++) {
           if (!res.data.results[i].formatted_address.includes('Unnamed Road')) {
-            console.log('lg lat', res.data.results[i])
-            console.log('lg lat', res.data.results[i].geometry.location.lat)
-            console.log('lg lng', res.data.results[i].geometry.location.lat)
-            setLatitude(res.data.results[i].geometry.location.lat)
-            setLongitude(res.data.results[i].geometry.location.lng)
+            setLatitude(latLng.lat)
+            setLongitude(latLng.lng)
             setAddress(res.data.results[i].formatted_address)
             setAutoCompleteText(res.data.results[i].formatted_address)
             ref.current?.setAddressText(res.data.results[i].formatted_address)
@@ -115,7 +112,8 @@ const Profile = ({
       address,
       name: addressName
     }
-    await addAddress(body)
+    const newAddress = await addAddress(body)
+    addressSelected(newAddress.id)
     setAddressmodalActive(false)
     setUpdatingUser(false)
   }
@@ -168,18 +166,39 @@ const Profile = ({
   }
 
   useEffect(() => {
+    mapRef.current.setMapBoundaries(
+      { latitude: 14.064176315019349, longitude: 121.7682355093625 },
+      { latitude: 13.87847842331748, longitude: 121.39448686001403 }
+    );
     Keyboard.addListener('keyboardDidShow', () => setKeyboardActive(true));
     Keyboard.addListener('keyboardDidHide', () => setKeyboardActive(false));
   
     return () => {
+      mapRef.current.setMapBoundaries(
+        { latitude: 14.064176315019349, longitude: 121.7682355093625 },
+        { latitude: 13.87847842331748, longitude: 121.39448686001403 }
+      );
       Keyboard.removeListener('keyboardDidShow', () => setKeyboardActive(true))
       Keyboard.removeListener('keyboardDidHide', () => setKeyboardActive(false))
     }
   }, [])
 
   useEffect(() => {
-    console.log(ref.current.getAddressText())
-  }, [ref])
+    mapRef.current?.animateCamera({
+      center: {
+        latitude: latitude,
+        longitude: longitude,
+        latitudeDelta: 1,
+        longitudeDelta: 1
+      },
+      // pitch: 2,
+      // heading: 20,
+      // altitude: 200,
+      zoom: 17
+    },
+      // duration: 1
+    )
+  }, [latitude, longitude])
   
   useEffect(() => {
     if (addressmodalActive) {
@@ -314,6 +333,10 @@ const Profile = ({
               query={{
                 key: GOOGLE_API_KEY,
                 language: 'en',
+                components: 'country:ph',
+                location: "13.946958175958924, 121.61064815344236",
+                radius: "15000", //100 km
+                strictbounds: true,
               }}
               textInputProps={{
                 onFocus: () => setAutoCompleteFocused(true),
@@ -321,10 +344,11 @@ const Profile = ({
                 onChangeText: e => setAutoCompleteText(e)
               }}
               // currentLocation={true}
-              // currentLocationLabel='Current location'
+              // currentLocationLabel='My Current Location'
               styles={{
                 container: {
-                  maxHeight: keyboardActive && autoCompleteText.length >= 1 && autoCompleteFocused ? null : 50,
+                  // maxHeight: keyboardActive && autoCompleteFocused ? (autoCompleteText.length >= 1 ? null : 95) : 50,
+                  maxHeight: keyboardActive && autoCompleteFocused && autoCompleteText.length >= 1 ? null : 50,
                   borderTopWidth: 1,
                   borderRadius: 0,
                   borderColor: "#E7EAED",
@@ -353,6 +377,7 @@ const Profile = ({
             ><Ionicons name="close-circle" size={22} color={ '#ECECEC' } style={{ position: 'absolute', zIndex: 9, right: 12, top: 12 }} onPress={() => {ref.current?.setAddressText(''), setAutoCompleteText('')}}/></GooglePlacesAutocomplete>
             
             <MapView
+              ref={mapRef}
               style={{ flex: 1 }}
               provider={PROVIDER_GOOGLE}
               showsUserLocation={true}
@@ -362,8 +387,12 @@ const Profile = ({
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421
               }}
+              loadingEnabled={true}
+              minZoomLevel={13}
+              maxZoomLevel={20}
               // customMapStyle={['c90416c7434e6e52']}
               onPress={e => {
+                // console.log(e.nativeEvent)
                 let lat = e.nativeEvent.coordinate.latitude
                 let lng = e.nativeEvent.coordinate.longitude
                 locationGeocode({ latLng: { lat, lng } })
