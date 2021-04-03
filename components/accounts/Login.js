@@ -1,17 +1,11 @@
 import React, { useEffect, useState, Fragment } from 'react';
-import { default as theme } from '../../custom-theme.json';
-import * as eva from '@eva-design/eva';
+import { PROJECT_URL } from "@env"
 
 import { connect } from 'react-redux';
-// import PropTypes from 'prop-types'
+import PropTypes from 'prop-types'
 
 import { Icon, Layout, Text, Button, Card, Input } from '@ui-kitten/components';
 import { LogBox, Dimensions, StyleSheet, Image, ScrollView, SafeAreaView, View, FlatList, TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
-
-import { v4 as uuid } from 'uuid'
-
-import Header from '../layout/Header'
-import BottomTabs from '../layout/BottomTabs'
 
 import { login, socialSignin, reroute } from '../../actions/auth';
 
@@ -61,14 +55,12 @@ const Login = ({
     })
   }, [userLoading]);
 
-  const trikeURL = 'https://www.trike.com.ph'
-
   return (
     <>
       <Layout level="2">
         <Image
           style={styles.tinyLogo}
-          source={{uri:`${trikeURL}/static/frontend/img/Trike_logo-whole.png`}}
+          source={{uri:`${PROJECT_URL}/static/frontend/img/Trike_logo-whole.png`}}
         />
         <Card style={styles.authCard}>
           <Text style={{ fontSize: 24, fontWeight: '700', marginBottom: 25, alignSelf: 'center' }}>Login</Text>
@@ -123,11 +115,11 @@ const styles = StyleSheet.create({
   }
 })
 
-// Login.propTypes = {
-//   login: PropTypes.func.isRequired,
-//   socialSignin: PropTypes.func.isRequired,
-//   reroute: PropTypes.func.isRequired,
-// }
+Login.propTypes = {
+  login: PropTypes.func.isRequired,
+  socialSignin: PropTypes.func.isRequired,
+  reroute: PropTypes.func.isRequired,
+}
 
 const mapStateToProps = state => ({
   auth: state.auth,

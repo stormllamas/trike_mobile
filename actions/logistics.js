@@ -1,4 +1,5 @@
 // import moment from 'moment'
+import { PROJECT_URL } from "@env"
 import axios from 'axios';
 
 import {
@@ -69,8 +70,6 @@ import {
 
 import { tokenConfig } from './auth';
 
-const trikeURL = 'https://www.trike.com.ph'
-
 export const getCategories = ({ categoryQueries }) => async (dispatch, getState) => {
   dispatch({ type: CATEGORIES_LOADING });
 
@@ -79,7 +78,7 @@ export const getCategories = ({ categoryQueries }) => async (dispatch, getState)
     categoryQueries.forEach(query => {
       queries += `&group=${query}`
     })
-    const categories = await axios.get(`${trikeURL}/api/category/${queries}`)
+    const categories = await axios.get(`${PROJECT_URL}/api/category/${queries}`)
     // console.log(categories.data)
 
     dispatch({
@@ -116,7 +115,7 @@ const setSellerQueries = (getState) => {
 export const getAllSellers = () => async (dispatch, getState) => {
   try {
     await dispatch({ type: ALL_SELLERS_LOADING });
-    const res = await axios.get(`${trikeURL}/api/all_sellers/`)
+    const res = await axios.get(`${PROJECT_URL}/api/all_sellers/`)
     dispatch({
       type: GET_ALL_SELLERS,
       payload: res.data,
@@ -131,7 +130,7 @@ export const getSellers = ({ getMore, keywordsQuery }) => async (dispatch, getSt
     if (!getMore) {
       await dispatch({ type: SELLERS_LOADING });
       const { cuisineQuery, keywordsQuery } = setSellerQueries(getState)
-      const res = await axios.get(`${trikeURL}/api/sellers/?${cuisineQuery}${keywordsQuery}`)
+      const res = await axios.get(`${PROJECT_URL}/api/sellers/?${cuisineQuery}${keywordsQuery}`)
       dispatch({
         type: GET_SELLERS,
         payload: res.data,
@@ -145,7 +144,7 @@ export const getSellers = ({ getMore, keywordsQuery }) => async (dispatch, getSt
       const { cuisineQuery, keywordsQuery } = setSellerQueries(getState)
       const { sellersCurrentPage } = getState().logistics;
       const pageQuery = `?page=${sellersCurrentPage}`
-      const res = await axios.get(`${trikeURL}/api/sellers/${pageQuery}${cuisineQuery}${keywordsQuery}`)
+      const res = await axios.get(`${PROJECT_URL}/api/sellers/${pageQuery}${cuisineQuery}${keywordsQuery}`)
       dispatch({
         type: GET_MORE_SELLERS,
         payload: res.data,
@@ -160,7 +159,7 @@ export const getSeller = ({ sellerQuery }) => async (dispatch, getState) => {
   dispatch({ type: SELLER_LOADING });
   dispatch({ type: PRODUCTS_LOADING });
   try {
-    const res = await axios.get(`${trikeURL}/api/seller/${sellerQuery}/`)
+    const res = await axios.get(`${PROJECT_URL}/api/seller/${sellerQuery}/`)
     await dispatch({
       type: GET_SELLER,
       payload: res.data,
@@ -194,7 +193,7 @@ export const getProducts = ({ getMore }) => async (dispatch, getState) => {
       dispatch({ type: PRODUCTS_LOADING });
       const { productsCurrentPage, courseFilter, seller } = getState().logistics;
       const productsQuery = `&page=${productsCurrentPage}&course=${courseFilter ? courseFilter : ''}`
-      const seller_products = await axios.get(`${trikeURL}/api/products/?seller=${seller.name_to_url}${productsQuery}`)
+      const seller_products = await axios.get(`${PROJECT_URL}/api/products/?seller=${seller.name_to_url}${productsQuery}`)
       dispatch({
         type: GET_PRODUCTS,
         payload: seller_products.data,
@@ -207,7 +206,7 @@ export const getProducts = ({ getMore }) => async (dispatch, getState) => {
       })
       const { productsCurrentPage, courseFilter, seller } = getState().logistics;
       const productsQuery = `&page=${productsCurrentPage}&course=${courseFilter ? courseFilter : ''}`
-      const seller_products = await axios.get(`${trikeURL}/api/products/?seller=${seller.name_to_url}${productsQuery}`)
+      const seller_products = await axios.get(`${PROJECT_URL}/api/products/?seller=${seller.name_to_url}${productsQuery}`)
       dispatch({
         type: GET_MORE_PRODUCTS,
         payload: seller_products.data,
@@ -221,7 +220,7 @@ export const getProducts = ({ getMore }) => async (dispatch, getState) => {
 export const getProduct = ({ productQuery, sellerQuery }) => async (dispatch, getState) => {
   try {
     dispatch({ type: PRODUCT_LOADING });
-    const res = await axios.get(`${trikeURL}/api/product/${productQuery}/${sellerQuery}/`)
+    const res = await axios.get(`${PROJECT_URL}/api/product/${productQuery}/${sellerQuery}/`)
     dispatch({
       type: GET_PRODUCT,
       payload: res.data,
@@ -242,7 +241,7 @@ export const setCourse = ({ course }) => async (dispatch, getState) => {
 export const getCurrentOrder = ({ type, query, updateOnly }) => async (dispatch, getState) => {
   !updateOnly && dispatch({ type: CURRENT_ORDER_LOADING });
   try {
-    const res = await axios.get(`${trikeURL}/api/current_order/${type}/${query ? query : ''}`, tokenConfig(getState))
+    const res = await axios.get(`${PROJECT_URL}/api/current_order/${type}/${query ? query : ''}`, tokenConfig(getState))
     dispatch({
       type: GET_CURRENT_ORDER,
       payload: res.data,
@@ -259,7 +258,7 @@ export const getOrders = ({ getMore }) => async (dispatch, getState) => {
       dispatch({ type: ORDERS_LOADING });
       const { ordersCurrentPage, currentOnly } = getState().logistics;
       const ordersQuery = `page=${ordersCurrentPage}`
-      const orders = await axios.get(`${trikeURL}/api/orders/?${ordersQuery}${currentOnly ? `&delivered=false`: ''}`, tokenConfig(getState))
+      const orders = await axios.get(`${PROJECT_URL}/api/orders/?${ordersQuery}${currentOnly ? `&delivered=false`: ''}`, tokenConfig(getState))
       dispatch({
         type: GET_ORDERS,
         payload: orders.data,
@@ -272,7 +271,7 @@ export const getOrders = ({ getMore }) => async (dispatch, getState) => {
       })
       const { ordersCurrentPage, currentOnly } = getState().logistics;
       const ordersQuery = `?page=${ordersCurrentPage}`
-      const orders = await axios.get(`${trikeURL}/api/orders/${ordersQuery}${currentOnly ? `&delivered=false`: ''}`, tokenConfig(getState))
+      const orders = await axios.get(`${PROJECT_URL}/api/orders/${ordersQuery}${currentOnly ? `&delivered=false`: ''}`, tokenConfig(getState))
       dispatch({
         type: GET_MORE_ORDERS,
         payload: orders.data,
@@ -286,7 +285,7 @@ export const getOrders = ({ getMore }) => async (dispatch, getState) => {
 export const getOrder = ({ orderID }) => async (dispatch, getState) => {
   dispatch({type: ORDER_LOADING});
   try {
-    const res = await axios.get(`${trikeURL}/api/order/${orderID}/`, tokenConfig(getState))
+    const res = await axios.get(`${PROJECT_URL}/api/order/${orderID}/`, tokenConfig(getState))
     dispatch({
       type: GET_ORDER,
       payload: res.data
@@ -310,7 +309,7 @@ export const addOrderItem = ({ productId, sellerID }) => async (dispatch, getSta
     product_variant: productId
   }
   try {
-    const res = await axios.post(`${trikeURL}/api/order_item/`, body, tokenConfig(getState))
+    const res = await axios.post(`${PROJECT_URL}/api/order_item/`, body, tokenConfig(getState))
     console.log(res.data)
     await dispatch(getCurrentOrder({
       type: 'food',
@@ -329,7 +328,7 @@ export const addOrderItem = ({ productId, sellerID }) => async (dispatch, getSta
 export const deleteOrderItem = ({ id, sellerID }) => async (dispatch, getState) => {
   dispatch({ type: DELETE_LOADING });
   try {
-    await axios.delete(`${trikeURL}/api/order_item/${id}/`, tokenConfig(getState))
+    await axios.delete(`${PROJECT_URL}/api/order_item/${id}/`, tokenConfig(getState))
     await dispatch(getCurrentOrder({
       type: 'food',
       query: `?order_seller=${sellerID}`,
@@ -343,12 +342,11 @@ export const deleteOrderItem = ({ id, sellerID }) => async (dispatch, getState) 
     dispatch({ type: DELETE_ERROR });
     dispatch({ type: AUTH_ERROR});
   }
-  $('.loader').fadeOut();
 }
 export const changeQuantity = ({ orderItemID, sellerID, operation }) => async (dispatch, getState) => {
   dispatch({ type: QUANTITY_LOADING })  
   try {
-    const res = await axios.put(`${trikeURL}/api/change_quantity/${orderItemID}/${operation}/`, null, tokenConfig(getState))
+    const res = await axios.put(`${PROJECT_URL}/api/change_quantity/${orderItemID}/${operation}/`, null, tokenConfig(getState))
     if (res.data.status === 'okay') {
       dispatch({ type: QUANTITY_CHANGED })
       dispatch(getCurrentOrder({
@@ -358,11 +356,6 @@ export const changeQuantity = ({ orderItemID, sellerID, operation }) => async (d
       }))
     } else {
       dispatch({ type: QUANTITY_CHANGE_ERROR })
-      M.toast({
-        html: res.data.msg,
-        displayLength: 3500,
-        classes: 'red',
-      });
     }
   } catch (err) {
     dispatch({ type: AUTH_ERROR })
@@ -372,7 +365,7 @@ export const changeQuantity = ({ orderItemID, sellerID, operation }) => async (d
 export const cancelOrder = ({ id }) => async (dispatch, getState) => {
   $('.loader').fadeIn();
   try {
-    const res = await axios.put(`${trikeURL}/api/cancel_order/${id}/`, null, tokenConfig(getState))
+    const res = await axios.put(`${PROJECT_URL}/api/cancel_order/${id}/`, null, tokenConfig(getState))
     if (res.data.status) {
       await dispatch(getOrders({
         getMore: false,
@@ -434,7 +427,7 @@ export const foodCheckout = ({ formData, orderSeller, navigation }) => async (di
       duration_text: formData.durationText,
       duration_value: formData.durationValue,
     }
-    const res = await axios.put(`${trikeURL}/api/food_checkout/${orderSeller.id}/`, orderBody, tokenConfig(getState))
+    const res = await axios.put(`${PROJECT_URL}/api/food_checkout/${orderSeller.id}/`, orderBody, tokenConfig(getState))
     if (res.data.status === "okay") {
       dispatch({ type: CHECKOUT_SUCCESS })
       navigation.navigate('FoodPayment', { selectedSeller: orderSeller.name })
@@ -504,7 +497,7 @@ export const confirmDelivery = ({ formData, history }) => async (dispatch, getSt
           duration_text: durationString,
           duration_value: durationValue,
         }
-        const currentOrder = await axios.put(`${trikeURL}/api/current_order/delivery/`, orderBody, tokenConfig(getState))
+        const currentOrder = await axios.put(`${PROJECT_URL}/api/current_order/delivery/`, orderBody, tokenConfig(getState))
         history.push('/delivery/payments')
       }
     });
@@ -551,7 +544,7 @@ export const confirmRideHail = ({ formData, history }) => async (dispatch, getSt
           duration_text: durationString,
           duration_value: durationValue,
         }
-        const currentOrder = await axios.put(`${trikeURL}/api/current_order/ride_hail/`, orderBody, tokenConfig(getState))
+        const currentOrder = await axios.put(`${PROJECT_URL}/api/current_order/ride_hail/`, orderBody, tokenConfig(getState))
         history.push('/ride_hail/payments')
       }
     });
@@ -564,7 +557,7 @@ export const finalizeTransaction = ({ authID, currentOrder, history, type, query
 
   let paypalkeys
   try {
-    const res = await axios.get(`${trikeURL}/api/auth/paypal_keys`, tokenConfig(getState))
+    const res = await axios.get(`${PROJECT_URL}/api/auth/paypal_keys`, tokenConfig(getState))
     paypalkeys = res.data
   } catch (err) {
     dispatch({type: AUTH_ERROR});
@@ -603,7 +596,7 @@ export const finalizeTransaction = ({ authID, currentOrder, history, type, query
       'auth_id': authID,
       'capture_id': capture.data.id,
     }
-    await axios.put(`${trikeURL}/api/complete_order/2/${type}/${query ? query : ''}`, body, tokenConfig(getState))
+    await axios.put(`${PROJECT_URL}/api/complete_order/2/${type}/${query ? query : ''}`, body, tokenConfig(getState))
     dispatch({ type: COMPLETE_ORDER_SUCCESS });
     M.toast({
       html: 'Delivery Booked',
@@ -626,7 +619,7 @@ export const finalizeTransaction = ({ authID, currentOrder, history, type, query
 export const proceedWithCOD = ({ history, type, query, socket }) => async (dispatch, getState) => {
   dispatch({ type: COMPLETE_ORDER_LOADING });
   try {
-    const res = await axios.put(`${trikeURL}/api/complete_order/1/${type}/${query ? query : ''}`, null, tokenConfig(getState))
+    const res = await axios.put(`${PROJECT_URL}/api/complete_order/1/${type}/${query ? query : ''}`, null, tokenConfig(getState))
     if (res.data.status === 'success') {
       dispatch({ type: COMPLETE_ORDER_SUCCESS });
       M.toast({
@@ -643,13 +636,13 @@ export const proceedWithCOD = ({ history, type, query, socket }) => async (dispa
         classes: 'red'
       });
       if (type === 'food') {
-        history.push(`${trikeURL}/food/restaurant?b=${res.data.seller_name_to_url}&course=Meals`)
+        history.push(`${PROJECT_URL}/food/restaurant?b=${res.data.seller_name_to_url}&course=Meals`)
       } else {
         history.push('/bookings')
       }
     }
     $('.loader').fadeOut();
-    axios.post('${trikeURL}/api/new_order_update/', { 'ref_code': res.data.ref_code }, tokenConfig(getState))
+    axios.post('${PROJECT_URL}/api/new_order_update/', { 'ref_code': res.data.ref_code }, tokenConfig(getState))
   } catch (error) {
     console.log(error)
     dispatch({ type: COMPLETE_ORDER_FAILED });
@@ -665,7 +658,7 @@ export const proceedWithCOD = ({ history, type, query, socket }) => async (dispa
 export const getOrderItem = ({ orderItemID }) => async (dispatch, getState) => {
   try {
     dispatch({ type: ORDER_ITEM_LOADING });
-    const res = await axios.get(`${trikeURL}/api/order_item/${orderItemID}/`, tokenConfig(getState))
+    const res = await axios.get(`${PROJECT_URL}/api/order_item/${orderItemID}/`, tokenConfig(getState))
     dispatch({
       type: GET_ORDER_ITEM,
       payload: res.data,
@@ -685,7 +678,7 @@ export const reviewProduct = ({ order_item, product_variant, userID, rating, com
     comment
   }
   try {
-    const res = await axios.post(`${trikeURL}/api/review_product/`, body, tokenConfig(getState));
+    const res = await axios.post(`${PROJECT_URL}/api/review_product/`, body, tokenConfig(getState));
     if (res.data.status === "okay") {
       M.toast({
         html: 'Product Reviewed',
@@ -728,7 +721,7 @@ export const reviewProductOrder = ({ order, userID, rating, comment, history }) 
     comment
   }
   try {
-    const res = await axios.post(`${trikeURL}/api/review_order/`, body, tokenConfig(getState));
+    const res = await axios.post(`${PROJECT_URL}/api/review_order/`, body, tokenConfig(getState));
     if (res.data.status === "okay") {
       M.toast({
         html: 'Order Reviewed',
@@ -767,7 +760,7 @@ export const reviewOrder = ({ order, userID, rating, comment, history }) => asyn
     comment
   }
   try {
-    const res = await axios.post(`${trikeURL}/api/review_order/`, body, tokenConfig(getState));
+    const res = await axios.post(`${PROJECT_URL}/api/review_order/`, body, tokenConfig(getState));
     if (res.data.status === "okay") {
       M.toast({
         html: 'Order Reviewed',

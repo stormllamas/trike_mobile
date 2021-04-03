@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { connect } from 'react-redux';
+import { PROJECT_URL } from "@env"
 import { useBackButton } from '../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 
 
 import { Icon, Text, Button, Spinner, Card } from '@ui-kitten/components';
-import { Dimensions, View, Image, StyleSheet, ScrollView, TouchableHighlight } from 'react-native'
+import { Dimensions, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
 
 import Collapsible from 'react-native-collapsible';
 
@@ -101,111 +102,117 @@ const FoodPayment = ({
       <>
         <Header subtitle='Food Checkout' backLink={{component:'RestaurantDetail', options: {selectedSeller: route.params.selectedSeller }}} navigation={navigation}/>
         <ScrollView>
-          <View style={{ padding: 15 }}>
-            <View style={[ styles.boxWithShadow, { borderWidth: 1, borderColor: '#F2F2F2' }]}>
-              <View style={{ backgroundColor: '#ffffff' }}>
-                <View style={{ padding: 12, backgroundColor: '#F8F8F8' }}>
-                  <Text style={{ fontSize: 22, fontWeight: '700', borderColor: '#EAECF1' }}>Payment Summary</Text>
-                  <Text style={[styles.mute, styles.small]}>(Please review the details below)</Text>
+          <View style={styles.boxWithShadowContainer}>
+            <View style={ styles.boxWithShadow }>
+              <View style={styles.boxHeader}>
+                <Text style={{ fontSize: 22, borderColor: '#EAECF1', fontFamily: 'Lato-Bold' }}>Order Summary</Text>
+                <Text style={[styles.mute, styles.small]}>(Please review the details below)</Text>
+              </View>
+              <View style={styles.boxBody}>
+                <View style={{ paddingVertical: 5 }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Pickup Address</Text>
+                  <Text style={[styles.mute]}>{currentOrder.loc1_address}</Text>
                 </View>
-                <View style={{ padding: 12 }}>
-                  <Text style={{ fontWeight: '700' }}>Pickup Address</Text>
-                  <Text style={styles.mute}>{currentOrder.loc1_address}</Text>
+                <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Delivery Address</Text>
+                  <Text style={[styles.mute]}>{currentOrder.loc2_address}</Text>
                 </View>
-                <View style={{ padding: 12 }}>
-                  <Text style={styles.label}>Delivery Address</Text>
-                  <Text style={styles.inputSummary}>{currentOrder.loc2_address}</Text>
+                <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Subtotal</Text>
+                  <Text style={[styles.mute]}>₱ {currentOrder.checkout_subtotal.toFixed(2)}</Text>
                 </View>
-                <View style={{ padding: 12 }}>
-                  <Text style={styles.label}>Subtotal</Text>
-                  <Text style={styles.inputSummary}>₱ {currentOrder.checkout_subtotal.toFixed(2)}</Text>
+                <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Shipping</Text>
+                  <Text style={[styles.mute]}>₱ {currentOrder.shipping.toFixed(2)}</Text>
                 </View>
-                <View style={{ padding: 12 }}>
-                  <Text style={styles.label}>Shipping</Text>
-                  <Text style={styles.inputSummary}>₱ {currentOrder.shipping.toFixed(2)}</Text>
-                </View>
-                <View style={{ padding: 12 }}>
-                  <Text style={styles.label}>Order Total</Text>
-                  <Text style={styles.inputSummary}>₱ {currentOrder.checkout_total.toFixed(2)}</Text>
+                <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Order Total</Text>
+                  <Text style={[{fontFamily: 'Lato-Bold'}]}>₱ {currentOrder.checkout_total.toFixed(2)}</Text>
                 </View>
               </View>
             </View>
           </View>
 
-          <View style={{ borderTopWidth: 8, borderColor: '#EAECF1'  }}>
-            <TouchableHighlight onPress={() => setOrderSummaryActivated(!orderSummaryActivated)}>
-              <View style={styles.collapsibleHeader}>
-                <Text category="h6" style={{ fontWeight: '700', fontSize: 16 }}>Order Summary</Text>
-                <Ionicons name={orderSummaryActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
-              </View>
-            </TouchableHighlight>
-            <Collapsible collapsed={orderSummaryActivated} duration={150} align="center">
-              <View style={styles.collapsibleContent}>
-                {currentOrder.order_items !== undefined && (
-                  currentOrder.order_items.map(orderItem => (
-                    <View key={orderItem.id} style={[styles.orderItem, {color: '#606060'}]}>
-                      <Image style={styles.orderItemImage} source={{ uri: `https://www.trike.com.ph${orderItem.product.thumbnail}`}}></Image>
-                      <View>
-                        <Text style={{ marginBottom: 5 }}>{orderItem.product.name} - {orderItem.product_variant.name}</Text>
-                        <Text style={{ fontSize: 12 }}>{orderItem.quantity} x ₱ {orderItem.product_variant.price.toFixed(2)}</Text>
-                        <Text>₱ {orderItem.total_price.toFixed(2)}</Text>
-                      </View>
-                    </View>
-                  ))
-                )}
-              </View>
-            </Collapsible>
-          </View>
-          
-          <View style={{ borderTopWidth: 8, borderColor: '#EAECF1' }}>
-            <TouchableHighlight onPress={() => setPersonalDetailsActivated(!personalDetailsActivated)}>
-              <View style={styles.collapsibleHeader}>
-                <Text category="h6" style={{ fontWeight: '700', fontSize: 16 }}>Personal Details</Text>
-                <Ionicons name={personalDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
-              </View>
-            </TouchableHighlight>
-            <Collapsible collapsed={personalDetailsActivated} duration={150} align="center">
-              <View style={styles.collapsibleContent}>
-                <View>
-                  <Text style={styles.label}>First Name</Text>
-                  <Text style={styles.inputSummary}>{currentOrder.first_name}</Text>
+          <View style={styles.boxWithShadowContainer}>
+            <View style={ styles.boxWithShadow }>
+              <TouchableOpacity onPress={() => setPaymentOptionsActivated(!paymentOptionsActivated)}>
+                <View style={[styles.collapsibleHeader, styles.boxHeader, { backgroundColor: '#ffffff', borderColor: '#EAECF1', borderBottomWidth: 1, borderRadius:10}]}>
+                  <Text category="h6" style={{ fontSize: 16, fontFamily: 'Lato-Bold' }}>Payment Options</Text>
+                  <Ionicons name={paymentOptionsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
                 </View>
-                <View>
-                  <Text style={styles.label}>Last Name</Text>
-                  <Text style={styles.inputSummary}>{currentOrder.last_name}</Text>
+              </TouchableOpacity>
+              <Collapsible collapsed={paymentOptionsActivated} duration={150} align="center">
+                <View style={styles.boxBody}>
+                  <Button style={foodPaymentStyles.CODButton} onPress={() => console.log('COD')}>Proceed with COD</Button>
                 </View>
-                <View>
-                  <Text style={styles.label}>Contact</Text>
-                  <Text style={styles.inputSummary}>{currentOrder.contact}</Text>
-                </View>
-                <View>
-                  <Text style={styles.label}>Email</Text>
-                  <Text style={styles.inputSummary}>{currentOrder.email}</Text>
-                </View>
-                <View>
-                  <Text style={styles.label}>Gender</Text>
-                  <Text style={styles.inputSummary}>{currentOrder.gender}</Text>
-                </View>
-                <View>
-                  <Text>Description</Text>
-                  <Text style={[styles.inputSummary, {minHeight: 75}]}>{currentOrder.description}</Text>
-                </View>
-              </View>
-            </Collapsible>
+              </Collapsible>
+            </View>
           </View>
 
-          <View style={{ borderTopWidth: 8, borderColor: '#EAECF1' }}>
-            <TouchableHighlight onPress={() => setPaymentOptionsActivated(!paymentOptionsActivated)}>
-              <View style={styles.collapsibleHeader}>
-                <Text category="h6" style={{ fontWeight: '700', fontSize: 16 }}>Payment Options</Text>
-                <Ionicons name={paymentOptionsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
-              </View>
-            </TouchableHighlight>
-            <Collapsible collapsed={paymentOptionsActivated} duration={150} align="center">
-              <View style={styles.collapsibleContent}>
-                <Button style={foodPaymentStyles.CODButton} onPress={() => console.log('COD')}>Proceed with COD</Button>
-              </View>
-            </Collapsible>
+          <View style={styles.boxWithShadowContainer}>
+            <View style={ styles.boxWithShadow }>
+              <TouchableOpacity onPress={() => setOrderSummaryActivated(!orderSummaryActivated)}>
+                <View style={[styles.collapsibleHeader, styles.boxHeader, { backgroundColor: '#ffffff', borderColor: '#EAECF1', borderBottomWidth: 1, borderRadius:10}]}>
+                  <Text category="h6" style={{ fontSize: 16, fontFamily: 'Lato-Bold' }}>Cart Summary</Text>
+                  <Ionicons name={orderSummaryActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
+                </View>
+              </TouchableOpacity>
+              <Collapsible collapsed={orderSummaryActivated} duration={150} align="center">
+                <View style={styles.boxBody}>
+                  {currentOrder.order_items !== undefined && (
+                    currentOrder.order_items.map((orderItem, index) => (
+                      <View key={orderItem.id} style={[styles.orderItem, {color: '#606060'}, index !== 0 ? {borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5} : {} ]}>
+                        <Image style={styles.orderItemImage} source={{ uri: `${PROJECT_URL}${orderItem.product.thumbnail}`}}></Image>
+                        <View>
+                          <Text style={{ marginBottom: 5 }}>{orderItem.product.name} - {orderItem.product_variant.name}</Text>
+                          <Text style={{ fontSize: 12 }}>{orderItem.quantity} x ₱ {orderItem.product_variant.price.toFixed(2)}</Text>
+                          <Text>₱ {orderItem.total_price.toFixed(2)}</Text>
+                        </View>
+                      </View>
+                    ))
+                  )}
+                  <View>
+                    <Text style={styles.label}>Order Notes</Text>
+                    <Text style={[styles.inputSummary, {minHeight: 75}]}>{currentOrder.description}</Text>
+                  </View>
+                </View>
+              </Collapsible>
+            </View>
+          </View>
+          
+          <View style={styles.boxWithShadowContainer}>
+            <View style={ styles.boxWithShadow }>
+              <TouchableOpacity onPress={() => setPersonalDetailsActivated(!personalDetailsActivated)}>
+                <View style={[styles.collapsibleHeader, styles.boxHeader, { backgroundColor: '#ffffff', borderColor: '#EAECF1', borderBottomWidth: 1, borderRadius:10}]}>
+                  <Text category="h6" style={{ fontSize: 16, fontFamily: 'Lato-Bold' }}>Personal Details</Text>
+                  <Ionicons name={personalDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
+                </View>
+              </TouchableOpacity>
+              <Collapsible collapsed={personalDetailsActivated} duration={150} align="center">
+                <View style={styles.boxBody}>
+                  <View>
+                    <Text style={styles.label}>First Name</Text>
+                    <Text style={[styles.inputSummary]}>{currentOrder.first_name}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.label}>Last Name</Text>
+                    <Text style={[styles.inputSummary]}>{currentOrder.last_name}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.label}>Contact</Text>
+                    <Text style={[styles.inputSummary]}>{currentOrder.contact}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.label}>Email</Text>
+                    <Text style={[styles.inputSummary]}>{currentOrder.email}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.label}>Gender</Text>
+                    <Text style={[styles.inputSummary]}>{currentOrder.gender}</Text>
+                  </View>
+                </View>
+              </Collapsible>
+            </View>
           </View>
         </ScrollView>
       </>

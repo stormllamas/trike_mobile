@@ -1,11 +1,11 @@
 import React, { Fragment, useEffect, useState } from 'react'
-// import PropTypes from 'prop-types'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { GOOGLE_API_KEY } from "@env"
+import { GOOGLE_API_KEY, PROJECT_URL } from "@env"
 
-import { Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation } from '@ui-kitten/components';
-import { Animated, Easing, Dimensions, View, TouchableHighlight, Image, StyleSheet, ScrollView } from 'react-native'
+import { Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation, Spinner } from '@ui-kitten/components';
+import { Animated, Easing, Dimensions, View, TouchableHighlight, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native'
 
 import Collapsible from 'react-native-collapsible';
 
@@ -34,7 +34,6 @@ const FoodCart = ({
 
     quantityLoading,
     deleteLoading,
-    checkoutLoading
   },
   seller,
   foodCartActive, setFoodCartActive,
@@ -157,12 +156,29 @@ const FoodCart = ({
       setPickupLng(seller.longitude)
       setPickupAddress(seller.address)
     }
+    return () => {
+      if (!userLoading && isAuthenticated) {
+        getCurrentOrder({
+          type: 'food',
+          query: `?order_seller=${seller.id}`
+        })
+        setPickupLat(seller.latitude)
+        setPickupLng(seller.longitude)
+        setPickupAddress(seller.address)
+      }
+    }
   }, [userLoading, isAuthenticated]);
   
   useEffect(() => {
     if (!currentOrderLoading && currentOrder !== null) {
       setDescription(currentOrder.description ? currentOrder.description : "")
     } else {
+    }
+    return () => {
+      if (!currentOrderLoading && currentOrder !== null) {
+        setDescription(currentOrder.description ? currentOrder.description : "")
+      } else {
+      }
     }
   }, [currentOrderLoading]);
   
@@ -191,150 +207,156 @@ const FoodCart = ({
   }, [modalAnim, foodCartActive])
   
   return (
-    <Animated.View style={[styles.superModal, { top: modalAnim }]}>
-      <>
-        <TopNavigation
-          accessoryLeft={() => <TopNavigationAction onPress={() => setFoodCartActive(false)} icon={props => <Icon {...props} name='arrow-back'/>}/>}
-          title={`My Order - ${seller.name}`}
-        />
-        {isAuthenticated && !user.groups.includes('rider') && (
-          !currentOrderLoading && currentOrder !== null && (
-            currentOrder.order_type === 'food' && (
-              currentOrder.order_items.length > 0 ? (
-                <>
-                  <ScrollView>
-                    <View style={{ borderTopWidth: 8, borderColor: '#EAECF1' }}>
-                      <TouchableHighlight onPress={() => setPersonalDetailsActivated(!personalDetailsActivated)}>
-                        <View style={styles.collapsibleHeader}>
-                          <Text category="h6" style={{ fontWeight: '700', fontSize: 16 }}>Personal Details</Text>
-                          <Ionicons name={personalDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
-                        </View>
-                      </TouchableHighlight>
-                      <Collapsible collapsed={personalDetailsActivated} duration={150} align="center">
-                        <View style={styles.collapsibleContent}>
-                          <Input
-                            value={firstName}
-                            label='First Name'
-                            placeholder='Enter Your First Name'
-                            onChangeText={nextValue => setFirstName(nextValue)}
-                            style={{ backgroundColor: 'white'}}
-                          />
-                          <Input
-                            value={lastName}
-                            label='Last Name'
-                            placeholder='Enter Your Last Name'
-                            onChangeText={nextValue => setLastName(nextValue)}
-                            style={{ backgroundColor: 'white'}}
-                          />
-                          <Input
-                            value={contact}
-                            label='Contact Number'
-                            placeholder='Enter Your Contact Number'
-                            onChangeText={nextValue => setContact(nextValue)}
-                            style={{ backgroundColor: 'white'}}
-                          />
-                          <Input
-                            value={email}
-                            label='Email'
-                            placeholder='Enter Your Email'
-                            onChangeText={nextValue => setEmail(nextValue)}
-                            style={{ backgroundColor: 'white'}}
-                          />
-                          <Select
-                            value={selectedGenderIndex.row == 0 ? 'Male' : 'Female'}
-                            selectedIndex={selectedGenderIndex}
-                            style={{ backgroundColor: 'white'}}
-                            label='Gender'
-                            onSelect={index => setSelectedGenderIndex(index)}>
-                            <SelectItem title='Male'/>
-                            <SelectItem title='Female'/>
-                          </Select>
-                        </View>
-                      </Collapsible>
+    isAuthenticated && !user.groups.includes('rider') && (
+      !currentOrderLoading && currentOrder !== null && (
+        currentOrder.order_type === 'food' && (
+          currentOrder.order_items.length > 0 ? (
+            <Animated.View style={[styles.superModal, { top: modalAnim }]}>
+              <TopNavigation
+                accessoryLeft={() => <TopNavigationAction onPress={() => setFoodCartActive(false)} icon={props => <Icon {...props} name='arrow-back'/>}/>}
+                title={`My Order - ${seller.name}`}
+              />
+              <ScrollView>
+                <View style={styles.collapsibleWrapper}>
+                  <TouchableHighlight onPress={() => setPersonalDetailsActivated(!personalDetailsActivated)}>
+                    <View style={styles.collapsibleHeader}>
+                      <Text category="h6" style={{ fontSize: 16, fontFamily: 'Lato-Bold' }}>Personal Details</Text>
+                      <Ionicons name={personalDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
                     </View>
-
-                    <View style={{ borderTopWidth: 8, borderColor: '#EAECF1'  }}>
-                      <TouchableHighlight onPress={() => setAddressDetailsActivated(!addressDetailsActivated)}>
-                        <View style={styles.collapsibleHeader}>
-                          <Text category="h6" style={{ fontWeight: '700', fontSize: 16 }}>Delivery Details</Text>
-                          <Ionicons name={addressDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
-                        </View>
-                      </TouchableHighlight>
-                      <Collapsible collapsed={addressDetailsActivated} duration={150} align="center">
-                        <View style={styles.collapsibleContent}>
-                          <Select
-                            value={user.addresses[selectedAddressIndex.row].name}
-                            selectedIndex={selectedAddressIndex}
-                            style={{ backgroundColor: 'white'}}
-                            onSelect={index => setSelectedAddressIndex(index)}>
-                            {user && (
-                              user.addresses.map(address => (
-                                <SelectItem key={address.id} title={address.name ? address.name : `Unnamed Address: ${address.address}`}/>
-                              ))
-                            )}
-                          </Select>
-                          <Input
-                            value={description}
-                            label='Description'
-                            multiline={true}
-                            textStyle={{ minHeight: 85, textAlignVertical : 'top' }}
-                            placeholder='Leave us some notes'
-                            onChangeText={nextValue => setDescription(nextValue)}
-                            style={{ backgroundColor: 'white' }}
-                          />
-                        </View>
-                      </Collapsible>
+                  </TouchableHighlight>
+                  <Collapsible collapsed={personalDetailsActivated} duration={150} align="center">
+                    <View style={styles.collapsibleContent}>
+                      <Input
+                        value={firstName}
+                        label='First Name'
+                        placeholder='Enter Your First Name'
+                        onChangeText={nextValue => setFirstName(nextValue)}
+                        style={{ backgroundColor: 'white'}}
+                      />
+                      <Input
+                        value={lastName}
+                        label='Last Name'
+                        placeholder='Enter Your Last Name'
+                        onChangeText={nextValue => setLastName(nextValue)}
+                        style={{ backgroundColor: 'white'}}
+                      />
+                      <Input
+                        value={contact}
+                        label='Contact Number'
+                        placeholder='Enter Your Contact Number'
+                        onChangeText={nextValue => setContact(nextValue)}
+                        style={{ backgroundColor: 'white'}}
+                      />
+                      <Input
+                        value={email}
+                        label='Email'
+                        placeholder='Enter Your Email'
+                        onChangeText={nextValue => setEmail(nextValue)}
+                        style={{ backgroundColor: 'white'}}
+                      />
+                      <Select
+                        value={selectedGenderIndex.row == 0 ? 'Male' : 'Female'}
+                        selectedIndex={selectedGenderIndex}
+                        style={{ backgroundColor: 'white'}}
+                        label='Gender'
+                        onSelect={index => setSelectedGenderIndex(index)}>
+                        <SelectItem title='Male'/>
+                        <SelectItem title='Female'/>
+                      </Select>
                     </View>
+                  </Collapsible>
+                </View>
 
-                    <View style={{ borderTopWidth: 8, borderColor: '#EAECF1', backgroundColor: 'white', padding: 10 }}>
-                      <Text category="h6" style={{ fontWeight: '700', marginTop: 10, marginBottom: 10, fontSize: 16 }}>Items</Text>
-                      {currentOrder.order_items !== undefined && (
-                        currentOrder.order_items.map(orderItem => (
-                          <View key={orderItem.id} style={[styles.orderItem, (!orderItem.product.is_published ? {backgroundColor: '#EEEEEE', color: '#606060'} : {})]}>
-                            <Image style={styles.orderItemImage} source={{ uri: `https://www.trike.com.ph${orderItem.product.thumbnail}`}}></Image>
-                            <View>
-                              <Text style={{ marginBottom: 5 }}>{orderItem.product.name} - {orderItem.product_variant.name}</Text>
-                              <View style={styles.productQuantity}>
-                                <View style={[styles.decreaseQuantity, (orderItem.quantity > 1 && orderItem.product.is_published ? {} : {backgroundColor: '#EEEEEE'})]}>
-                                  <Ionicons style={orderItem.quantity > 1 && orderItem.product.is_published ? { color: '#4CAF50' } : {color: '#606060'}} name="chevron-back-outline" size={16} onPress={() => console.log('decrease')}/>
-                                </View>
-                                <View style={styles.quantity}>
-                                  <Text style={{ color: '#4CAF50' }}>{orderItem.quantity}</Text>
-                                </View>
-                                <View style={[styles.increaseQuantity, (orderItem.quantity < 10 && orderItem.product.is_published ? {} : {backgroundColor: '#EEEEEE'})]}>
-                                  <Ionicons style={orderItem.quantity < 10 && orderItem.product.is_published ? { color: '#4CAF50' } : {color: '#606060'}} name="chevron-forward-outline" size={16} onPress={() => console.log('increase')}/>
-                                </View>
-                              </View>
-                              <Text style={{ fontSize: 12 }}>{orderItem.quantity} x ₱ {orderItem.product_variant.price.toFixed(2)}</Text>
-                              <Text>₱ {orderItem.total_price.toFixed(2)}</Text>
+                <View style={styles.collapsibleWrapper}>
+                  <TouchableHighlight onPress={() => setAddressDetailsActivated(!addressDetailsActivated)}>
+                    <View style={styles.collapsibleHeader}>
+                      <Text category="h6" style={{ fontSize: 16, fontFamily: 'Lato-Bold' }}>Delivery Details</Text>
+                      <Ionicons name={addressDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
+                    </View>
+                  </TouchableHighlight>
+                  <Collapsible collapsed={addressDetailsActivated} duration={150} align="center">
+                    <View style={styles.collapsibleContent}>
+                      <Select
+                        value={user.addresses[selectedAddressIndex.row].name}
+                        selectedIndex={selectedAddressIndex}
+                        style={{ backgroundColor: 'white'}}
+                        onSelect={index => setSelectedAddressIndex(index)}>
+                        {user && (
+                          user.addresses.map(address => (
+                            <SelectItem key={address.id} title={address.name ? address.name : `Unnamed Address: ${address.address}`}/>
+                          ))
+                        )}
+                      </Select>
+                      <Text style={[styles.mute, styles.small, { marginTop: 5, paddingLeft: 15 }]}>{user.addresses[selectedAddressIndex.row].address}</Text>
+                      <Input
+                        value={description}
+                        label='Order Notes'
+                        multiline={true}
+                        textStyle={{ minHeight: 85, textAlignVertical : 'top' }}
+                        placeholder='Leave us some notes'
+                        onChangeText={nextValue => setDescription(nextValue)}
+                        style={{ backgroundColor: 'white', marginTop: 10 }}
+                      />
+                    </View>
+                  </Collapsible>
+                </View>
+
+                <View style={[styles.collapsibleWrapper, { backgroundColor: 'white', padding: 10 }]}>
+                  <Text category="h6" style={{ marginTop: 10, marginBottom: 10, fontSize: 16, fontFamily: 'Lato-Bold' }}>Items</Text>
+                  {currentOrder.order_items !== undefined && (
+                    currentOrder.order_items.map(orderItem => (
+                      <View key={orderItem.id} style={[styles.orderItem, (!orderItem.product.is_published ? {backgroundColor: '#EEEEEE', color: '#606060'} : {})]}>
+                        <Image style={styles.orderItemImage} source={{ uri: `${PROJECT_URL}${orderItem.product.thumbnail}`}}></Image>
+                        <View>
+                          <Text style={{ marginBottom: 5, fontFamily: 'Lato-Bold' }}>{orderItem.product.name} - {orderItem.product_variant.name}</Text>
+                          <View style={styles.productQuantity}>
+                            <TouchableOpacity
+                              style={[styles.decreaseQuantity, (orderItem.quantity > 1 && orderItem.product.is_published ? {} : {backgroundColor: '#EEEEEE'})]}
+                              onPress={orderItem.quantity > 1 && !quantityLoading && orderItem.product.is_published ? (() => changeQuantity({ orderItemID: orderItem.id, sellerID: seller.id, operation: 'subtract' })) : undefined}
+                            >
+                              <Ionicons style={orderItem.quantity > 1 && orderItem.product.is_published ? { color: '#4CAF50' } : {color: '#606060'}} name="chevron-back-outline" size={16}/>
+                            </TouchableOpacity>
+                            <View style={styles.quantity}>
+                              <Text style={{ color: '#4CAF50' }}>{orderItem.quantity}</Text>
                             </View>
-                            <Ionicons style={styles.deleteOrderItem} name="trash-outline" size={20} onPress={() => console.log(`delete ${orderItem.product.name} - ${orderItem.product_variant.name}`)}/>
+                            <TouchableOpacity
+                              style={[styles.increaseQuantity, (orderItem.quantity < 10 && orderItem.product.is_published ? {} : {backgroundColor: '#EEEEEE'})]}
+                              onPress={orderItem.quantity < 10 && !quantityLoading && orderItem.product.is_published ? (() => changeQuantity({ orderItemID: orderItem.id, sellerID: seller.id, operation: 'add' })) : undefined}
+                            >
+                              <Ionicons style={orderItem.quantity < 10 && orderItem.product.is_published ? { color: '#4CAF50' } : {color: '#606060'}} name="chevron-forward-outline" size={16}/>
+                            </TouchableOpacity>
                           </View>
-                        ))
-                      )}
-                    </View>
-                  </ScrollView>
-                  <>
-                    <Button
-                      style={foodCardStyles.checkoutButton}
-                      disabled={currentOrder.count < 1 || address === '' || !delivery || !lastName || !firstName || !contact || !email ? true : false}
-                      onPress={proceedToPayments}
-                    >
-                      CHECKOUT
-                    </Button>
-                    <Text style={foodCardStyles.checkoutFloatText}>{currentOrder.count < 1 || address === '' || !delivery || !lastName || !firstName || !contact || !email ? '' : `₱${(parseFloat(currentOrder.subtotal)+parseFloat(delivery)).toFixed(2)}` }</Text>
-                  </>
-                </>
-              ) : (
-                <>
-                  <ScrollView></ScrollView>
-                </>
-              )
-            )
+                          <Text style={[styles.mute, { fontSize: 14 }]}>{orderItem.quantity} x ₱ {orderItem.product_variant.price.toFixed(2)}</Text>
+                          <Text>₱ {orderItem.total_price.toFixed(2)}</Text>
+                        </View>
+                        <Ionicons style={styles.deleteOrderItem} name="trash-outline" size={20} onPress={() => deleteOrderItem({ id:orderItem.id, sellerID: seller.id })}/>
+                      </View>
+                    ))
+                  )}
+                </View>
+              </ScrollView>
+              <Button
+                style={[foodCardStyles.checkoutButton]}
+                disabled={currentOrder.count < 1 || address === '' || !delivery || !lastName || !firstName || !contact || !email ? true : false}
+                onPress={proceedToPayments}
+              >
+                CHECKOUT
+              </Button>
+              <Text style={[foodCardStyles.checkoutFloatText, {fontFamily: 'Lato-Bold'}]}>{currentOrder.count < 1 || address === '' || !delivery || !lastName || !firstName || !contact || !email ? '' : `₱${(parseFloat(currentOrder.subtotal)+parseFloat(delivery)).toFixed(2)}` }</Text>
+              {quantityLoading || currentOrderLoading || deleteLoading || siteInfoLoading || userLoading ? (
+                <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
+                  <Spinner size='large'/>
+                </View>
+              ): undefined}
+            </Animated.View>
+          ) : (
+            <>
+              <ScrollView></ScrollView>
+            </>
           )
-        )}
-      </>
-    </Animated.View>
+        )
+      )
+    )
   )
 }
 
@@ -343,29 +365,31 @@ let deviceHeight = Dimensions.get('window').height
 
 const foodCardStyles = StyleSheet.create({
   checkoutButton: {
+    // position:'absolute',
+    // bottom: 20,
     marginBottom: 25,
     width: deviceWidth,
-    backgroundColor: '#398d3c',
-    borderColor: '#398d3c',
+    backgroundColor: '#53A557',
+    borderColor: '#53A557',
     borderRadius: 0,
     zIndex: 10
   },
   checkoutFloatText: {
     position: 'absolute',
     color: 'white',
-    bottom: 35,
+    bottom: 39,
     right: 25,
     zIndex: 10
   },
 })
 
-// FoodCart.propTypes = {
-//   getCurrentOrder: PropTypes.func.isRequired,
-//   changeQuantity: PropTypes.func.isRequired,
-//   deleteOrderItem: PropTypes.func.isRequired,
-//   getAddress: PropTypes.func.isRequired,
-//   foodCheckout: PropTypes.func.isRequired,
-// }
+FoodCart.propTypes = {
+  getCurrentOrder: PropTypes.func.isRequired,
+  changeQuantity: PropTypes.func.isRequired,
+  deleteOrderItem: PropTypes.func.isRequired,
+  getAddress: PropTypes.func.isRequired,
+  foodCheckout: PropTypes.func.isRequired,
+}
 
 const mapStateToProps = state => ({
   auth: state.auth,

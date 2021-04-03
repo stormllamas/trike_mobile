@@ -1,6 +1,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { connect } from 'react-redux';
-// import PropTypes from 'prop-types'
+import { PROJECT_URL } from "@env"
+import PropTypes from 'prop-types'
 
 import { styles } from '../common/Styles'
 
@@ -24,14 +25,12 @@ const Intro = ({
     })
   }, [userLoading]);
 
-  const trikeURL = 'https://www.trike.com.ph'
-
   return (
     <>
-      <Layout style={styles.fullContainer}>
+      <Layout style={styles.fullContainerMedium}>
         <Image
           style={styles.tinyLogo}
-          source={{uri:`${trikeURL}/static/frontend/img/Trike_logo-whole.png`}}
+          source={{uri:`${PROJECT_URL}/static/frontend/img/Trike_logo-whole.png`}}
         />
         <Spinner size='large'/>
       </Layout>
@@ -39,9 +38,9 @@ const Intro = ({
   )
 }
 
-// Intro.propTypes = {
-//   reroute: PropTypes.func.isRequired,
-// }
+Intro.propTypes = {
+  reroute: PropTypes.func.isRequired,
+}
 
 const mapStateToProps = state => ({
   auth: state.auth,

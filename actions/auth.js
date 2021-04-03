@@ -14,9 +14,8 @@ import {
 } from '../actions/types';
 
 import { Alert } from "react-native";
+import { PROJECT_URL } from "@env"
 import axios from 'axios';
-
-const trikeURL = 'https://www.trike.com.ph'
 
 export const reroute = ({type, navigation, userLoading, isAuthenticated}) => async dispatch => {
   if (!userLoading) {
@@ -48,7 +47,7 @@ export const login = ({email, password}) => async dispatch => {
   const body = {email, password};
 
   try {
-    const res = await axios.post(`${trikeURL}/api/auth/login`, body)
+    const res = await axios.post(`${PROJECT_URL}/api/auth/login`, body)
     if (res.data.status === 'ok') {
       dispatch({
         type: LOGIN_SUCCESS,
@@ -96,7 +95,7 @@ export const logout = () => async (dispatch, getState) => {
   dispatch({ type: USER_LOADING });
 
   try {
-    await axios.post(`${trikeURL}/api/auth/logout`, null, tokenConfig(getState))
+    await axios.post(`${PROJECT_URL}/api/auth/logout`, null, tokenConfig(getState))
     dispatch({ type: LOGOUT_SUCCESS })
   } catch (err) {
     dispatch({ type: AUTH_ERROR })
@@ -114,7 +113,7 @@ export const signup = ({first_name, last_name, username, email, password}, histo
   };
 
   try {
-    const res = await axios.post(`${trikeURL}/api/auth/signup`, body)
+    const res = await axios.post(`${PROJECT_URL}/api/auth/signup`, body)
     if (res.data.status === "okay") {
       dispatch({ type: SIGNUP_SUCCESS })
       history.push(`/confirm_email/${email}`)
@@ -144,7 +143,7 @@ export const resendActivation = ({ email }, history) => async dispatch => {
     email
   }
   try {
-    const res = await axios.post(`${trikeURL}/api/auth/resend_activation`, body)
+    const res = await axios.post(`${PROJECT_URL}/api/auth/resend_activation`, body)
     if (res.data.status === "okay") {
       // dispatch({ type: SIGNUP_SUCCESS })
       M.toast({
@@ -176,7 +175,7 @@ export const resendActivation = ({ email }, history) => async dispatch => {
 
 
 export const getFacebookAuthID = async () => {
-  const res = await axios.get(`${trikeURL}/api/auth/facebook_keys`)
+  const res = await axios.get(`${PROJECT_URL}/api/auth/facebook_keys`)
   return res.data
 }
 export const socialSignin = ({first_name, last_name, email, facebook_id}, history) => async dispatch => {
@@ -194,7 +193,7 @@ export const socialSignin = ({first_name, last_name, email, facebook_id}, histor
   }
 
   try {
-    const res = await axios.post(`${trikeURL}/api/auth/social_auth`, body)
+    const res = await axios.post(`${PROJECT_URL}/api/auth/social_auth`, body)
     dispatch({
       type: SOCIAL_AUTH_SUCCESS,
       payload: res.data
@@ -216,7 +215,7 @@ export const activate = (uidb64, token, history) => async dispatch => {
     uidb64,
     token,
   };
-  const res = await axios.post(`${trikeURL}/api/auth/activate`, body)
+  const res = await axios.post(`${PROJECT_URL}/api/auth/activate`, body)
   if (res.data.status === 'okay') {
     dispatch({
       type: USER_ACTIVATED,
@@ -239,7 +238,7 @@ export const activate = (uidb64, token, history) => async dispatch => {
 }
 
 export const getServerToken = async () => {
-  const res = await axios.get(`${trikeURL}/api/auth/token`)
+  const res = await axios.get(`${PROJECT_URL}/api/auth/token`)
   return res.data
 }
 
@@ -249,7 +248,7 @@ export const loadUser = () => async (dispatch, getState) => {
   const token = await getServerToken()
   if (token) {
     try {
-      const res = await axios.get(`${trikeURL}/api/auth/user`, tokenConfig(getState, token))
+      const res = await axios.get(`${PROJECT_URL}/api/auth/user`, tokenConfig(getState, token))
       dispatch({
         type: USER_LOADED,
         payload: res.data,
@@ -267,7 +266,7 @@ export const updateUser = body => async (dispatch, getState) => {
   // dispatch({ type: USER_LOADING });
 
   try {
-    const res = await axios.put(`${trikeURL}/api/auth/user`, body, tokenConfig(getState))
+    const res = await axios.put(`${PROJECT_URL}/api/auth/user`, body, tokenConfig(getState))
     dispatch({ 
       type: USER_UPDATED,
       payload: res.data
@@ -281,7 +280,7 @@ export const addAddress = body => async (dispatch, getState) => {
   // dispatch({ type: USER_LOADING });
 
   try {
-    const res = await axios.post(`${trikeURL}/api/auth/address/`, body, tokenConfig(getState))
+    const res = await axios.post(`${PROJECT_URL}/api/auth/address/`, body, tokenConfig(getState))
     dispatch({ 
       type: ADDRESS_ADDED,
       payload: res.data
@@ -295,7 +294,7 @@ export const addAddress = body => async (dispatch, getState) => {
 export const getAddress = id => async (dispatch, getState) => {
   if (id) {
     try {
-      const res = await axios.get(`${trikeURL}/api/auth/address/${id}/`, tokenConfig(getState))
+      const res = await axios.get(`${PROJECT_URL}/api/auth/address/${id}/`, tokenConfig(getState))
       return res.data
     } catch (error) {
       return null
@@ -306,7 +305,7 @@ export const getAddress = id => async (dispatch, getState) => {
 export const updateAddressName = body => async (dispatch, getState) => {
   // dispatch({ type: USER_LOADING });
   try {
-    const res = await axios.put(`${trikeURL}/api/auth/address/${body.id}/`, body, tokenConfig(getState))
+    const res = await axios.put(`${PROJECT_URL}/api/auth/address/${body.id}/`, body, tokenConfig(getState))
     dispatch({ 
       type: ADDRESS_UPDATED,
       payload: body
@@ -320,7 +319,7 @@ export const deleteAddress = id => async (dispatch, getState) => {
   // dispatch({ type: USER_LOADING });
 
   try {
-    const res = await axios.delete(`${trikeURL}/api/auth/address/${id}/`, tokenConfig(getState))
+    const res = await axios.delete(`${PROJECT_URL}/api/auth/address/${id}/`, tokenConfig(getState))
     dispatch({ 
       type: ADDRESS_DELETED,
       payload: id
@@ -339,7 +338,7 @@ export const updatePassword = (old_password, new_password) => async (dispatch, g
   };
 
   try {
-    const res = await axios.put(`${trikeURL}/api/auth/change_password`, body, tokenConfig(getState))
+    const res = await axios.put(`${PROJECT_URL}/api/auth/change_password`, body, tokenConfig(getState))
     if (res.data.status === 'okay') {
       dispatch({ type: PASSWORD_UPDATE })
       M.toast({
@@ -376,7 +375,7 @@ export const requestPasswordReset = (email) => async (dispatch, getState) => {;
   }
 
   try {
-    const res = await axios.post(`${trikeURL}/api/auth/request_password_reset`, body)
+    const res = await axios.post(`${PROJECT_URL}/api/auth/request_password_reset`, body)
     if (res.data.status === 'okay') {
       M.toast({
         html: res.data.msg,
@@ -411,7 +410,7 @@ export const verifyPasswordReset = (uidb64, token) => async dispatch => {
     uidb64,
     token,
   };
-  const res = await axios.post(`${trikeURL}/api/auth/verify_password_reset`, body)
+  const res = await axios.post(`${PROJECT_URL}/api/auth/verify_password_reset`, body)
   if (res.data.status === 'okay') {
     dispatch({ 
       type: VERIFIED_PASSWORD_RESET,
@@ -429,7 +428,7 @@ export const resetPassword = (uidb64, token, newPassword, history) => async disp
     token,
     new_password: newPassword
   };
-  const res = await axios.put(`${trikeURL}/api/auth/reset_password`, body)
+  const res = await axios.put(`${PROJECT_URL}/api/auth/reset_password`, body)
   if (res.data.status === 'okay') {
     M.toast({
       html: 'Password reset successful',

@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
+import { PROJECT_URL } from "@env"
 import { useBackButton } from '../common/BackButtonHandler';
 
 import FoodCart from './FoodCart'
@@ -75,8 +76,6 @@ const ProductDetail = ({
         productId: selectedVariant,
         sellerID: product.seller.id
       })
-      console.log(selectedVariant)
-      console.log(product.seller.id)
     } else {
       Alert.alert(
         "Error",
@@ -124,7 +123,7 @@ const ProductDetail = ({
             <ImageBackground 
               resizeMode='cover'
               blurRadius={8}
-              source={{ uri: `https://www.trike.com.ph${product.seller.thumbnail}` }}
+              source={{ uri: `${PROJECT_URL}${product.seller.thumbnail}` }}
               style={productDetailsStyles.imagesBackground}
             >
               <View style={productDetailsStyles.thumbnailsOverlay}>
@@ -132,7 +131,7 @@ const ProductDetail = ({
                   ref={carouselRef}
                   data={productImages}
                   renderItem={({item , index}) => (
-                    <Image style={productDetailsStyles.productImage} source={{ uri: `https://www.trike.com.ph${item}`}}></Image>
+                    <Image style={productDetailsStyles.productImage} source={{ uri: `${PROJECT_URL}${item}`}}></Image>
                   )}
                   sliderWidth={Dimensions.get('window').width}
                   itemWidth={300}
@@ -178,7 +177,7 @@ const ProductDetail = ({
           </ScrollView>
           <Button style={productDetailsStyles.addToCartButton} onPress={() => addToOrder()}>Add To Cart</Button>
           {isAuthenticated && !user.groups.includes('rider') && !currentOrderLoading && currentOrder !== null && currentOrder.order_type === 'food' && currentOrder.order_items.length > 0 ? (
-            <Ionicons style={styles.foodCartButton} name="cart" size={28} color={"#ffffff"} onPress={() => setFoodCartActive(!foodCartActive)}/>
+            <Ionicons style={[styles.foodCartButton, {bottom: 60}]} name="cart" size={28} color={"#ffffff"} onPress={() => setFoodCartActive(!foodCartActive)}/>
           ) : undefined}
           <FoodCart seller={product.seller} foodCartActive={foodCartActive} setFoodCartActive={setFoodCartActive} navigation={navigation} />
         </>
@@ -231,9 +230,12 @@ const productDetailsStyles = StyleSheet.create({
     alignSelf:'flex-end'
   },
   addToCartButton: {
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 1,
     width: deviceWidth,
-    backgroundColor: '#398d3c',
-    borderColor: '#398d3c',
+    backgroundColor: '#53A557',
+    borderColor: '#53A557',
     borderRadius: 0
   },
 })

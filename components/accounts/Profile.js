@@ -355,15 +355,12 @@ const Profile = ({
                 },
                 textInputContainer: {
                   paddingRight: 35
-                  // backgroundColor: 'grey',
-                  // borderRadius: 0
                 },
                 textInput: {
                   height: 45,
                   color: '#5d5d5d',
                   fontSize: 16,
                   borderRadius: 0,
-                  // borderBottomWidth: 1,
                 },
                 listView: {
                   position: 'absolute',
@@ -374,7 +371,9 @@ const Profile = ({
                 }
                 
               }}
-            ><Ionicons name="close-circle" size={22} color={ '#ECECEC' } style={{ position: 'absolute', zIndex: 9, right: 12, top: 12 }} onPress={() => {ref.current?.setAddressText(''), setAutoCompleteText('')}}/></GooglePlacesAutocomplete>
+            >
+              <Ionicons name="close-circle" size={22} color={'#ECECEC'} style={{ position: 'absolute', zIndex: 9, right: 12, top: 12 }} onPress={() => {ref.current?.setAddressText(''), setAutoCompleteText('')}}/>
+            </GooglePlacesAutocomplete>
             
             <MapView
               ref={mapRef}

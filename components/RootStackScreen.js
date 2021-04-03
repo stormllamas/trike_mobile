@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
+import { PROJECT_URL } from "@env"
 import PropTypes from 'prop-types'
 
 import { createStackNavigator } from '@react-navigation/stack';
@@ -115,8 +116,6 @@ const Root = ({
     setMenuActive(sideBarToggled)
   }, [sideBarToggled]);
 
-  const trikeURL = 'https://www.trike.com.ph'
-
   return (
     <>
       <Animated.View style={[styles.overlay, { opacity: menuOverlayOpacity }, { left: menuOverlayWidth }]}>
@@ -135,20 +134,19 @@ const Root = ({
                 marginTop: 30,
                 marginBottom: 30,
               }}
-              source={{uri:`${trikeURL}/static/frontend/img/Trike_logo-whole.png`}}
+              source={{uri:`${PROJECT_URL}/static/frontend/img/Trike_logo-whole.png`}}
             />
           </View>
           <Menu
             selectedIndex={selectedMenuIndex}
             onSelect={index => setSelectedMenuIndex(index)}>
             <MenuItem title='Home' accessoryLeft={() => <Ionicons size={22} name='home-outline'/>}/>
-            <MenuItem title='My Bookings' accessoryLeft={() => <Ionicons size={22} name='cube-outline'/>}/>
-            {/* <MenuGroup title='Account Controls'> */}
-              <MenuItem title='Account Controls'/>
+            <MenuItem title='My Bookings' accessoryLeft={() => <Ionicons size={22} name='cube-outline'/>} onPress={() => navigation.navigate('Bookings')}/>
+            <MenuGroup title='Account'>
               <MenuItem title='My Profile' accessoryLeft={() => <Ionicons size={22} name='person-circle-outline'/>} onPress={() => navigation.navigate('Profile')}/>
               <MenuItem title='Security' accessoryLeft={() => <Ionicons size={22} name='shield-outline'/>}/>
               <MenuItem title='Logout' accessoryLeft={() => <Ionicons size={22} name='log-out-outline'/>}/>
-            {/* </MenuGroup> */}
+            </MenuGroup>
           </Menu>
         </>
       </Animated.View>

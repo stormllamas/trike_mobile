@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
+import { PROJECT_URL } from "@env"
 import { connect } from 'react-redux';
 
 import { useBackButton } from '../common/BackButtonHandler';
@@ -85,11 +86,19 @@ const RestaurantDetail = ({
       sellerQuery: route.params.selectedSeller
     })
     setRendered(true)
+    return () => {
+      setRendered(true)
+    }
   }, []);
 
   useEffect(() => {
     if (!sellerLoading) {
       setCourse({course: 'Main'})
+    }
+    return () => {
+      if (!sellerLoading) {
+        setCourse({course: 'Main'})
+      }
     }
   }, [sellerLoading]);
   
@@ -109,7 +118,7 @@ const RestaurantDetail = ({
       seller !== null ? (
         <>
           <Layout>
-            <Header backLink={{component:'Root', options: {screen : 'Food'}}} navigation={navigation}/>
+            <Header backLink={{component:'Root', options: {screen : 'Food'}}} subtitle='Food' navigation={navigation}/>
             {/* {!currentOrderLoading && currentOrder && (
               currentOrder.order_items.length > 0 && (
                 <div className="fixed-action-btn">
@@ -120,7 +129,7 @@ const RestaurantDetail = ({
               )
             )} */}
             <View style={{ padding: 15 }}>
-              <Text category="h6" style={{ fontWeight: '700' }}>{seller.name}</Text>
+              <Text category="h5" style={{ fontFamily: 'Lato-Bold' }}>{seller.name}</Text>
               {seller.categories.length > 0 && (
                 <View style={{ flexDirection: 'row', marginTop: 10 }}>
                   {seller.categories.map((category, index) => (
@@ -146,23 +155,25 @@ const RestaurantDetail = ({
               <Tab title='DESSERTS' icon={props => <Ionicons name="ice-cream-outline" size={28} color={selectedIndex == 3 ? "#FBA535":"#909CB4"}></Ionicons>}/>
             </TabBar>
           </Layout>
+          <Divider/>
           <IOScrollView>
             <Layout style={{ padding: 15 }}>
-              <Text category="h6" style={{marginBottom: 10}}>Featured Items</Text>
+              <Text category="h6" style={{marginBottom: 10, fontFamily: 'Lato-Bold'}}>Featured Items</Text>
               <FlatList
                 horizontal={true}
                 data={seller.features}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => navigation.navigate('ProductDetail', { selectedProduct: item.name, selectedSeller: item.seller.name })}>
                     <View key={item.id} style={restaurantDetailStyles.featureWrapper}>
-                      <Image style={restaurantDetailStyles.featureImage} source={{ uri: `https://www.trike.com.ph${item.thumbnail}` }} />
-                      <Text style={restaurantDetailStyles.featureText}>{item.name}</Text>
+                      <Image style={restaurantDetailStyles.featureImage} source={{ uri: `${PROJECT_URL}${item.thumbnail}` }} />
+                      <Text style={[restaurantDetailStyles.featureText]}>{item.name}</Text>
                     </View>
                   </TouchableOpacity>
                 )}
                 keyExtractor={feature => feature.id.toString()}
               />
             </Layout>
+            <Divider/>
             <Layout level="2" style={{ flexDirection: 'row', flexWrap: 'wrap', paddingTop: 6, paddingBottom: 75 }}>
               {!productsLoading ? (
                 products.results.length > 0 ? (
@@ -174,8 +185,9 @@ const RestaurantDetail = ({
                     productsPlaceholder(placeholderRange)
                   )
                 ) : (
-                  <View style={styles.emptyList}>
-                    <Text style={{ color: '#FAA634', fontWeight: '700', fontSize: 26}}>No Products</Text>
+                  <View style={styles.fullContainerSmall}>
+                    <Image style={{ height: 200, width: 205 }} source={{ uri: `${PROJECT_URL}/static/frontend/img/Trike_no_products.png` }} />
+                    <Text style={{ color: '#FAA634', fontWeight: '700', fontSize: 26}}>No Products Found</Text>
                   </View>
                 )
               ) : (
@@ -191,6 +203,7 @@ const RestaurantDetail = ({
           {isAuthenticated && !user.groups.includes('rider') && !currentOrderLoading && currentOrder !== null && currentOrder.order_type === 'food' && currentOrder.order_items.length > 0 ? (
             <Ionicons style={styles.foodCartButton} name="cart" size={28} color={"#ffffff"} onPress={() => setFoodCartActive(!foodCartActive)}/>
           ) : undefined}
+          
           <FoodCart seller={seller} foodCartActive={foodCartActive} setFoodCartActive={setFoodCartActive} navigation={navigation}/>
         </>
       ) : (

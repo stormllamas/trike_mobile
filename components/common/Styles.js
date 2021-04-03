@@ -13,7 +13,13 @@ export const styles = StyleSheet.create({
     width: deviceWidth,
     padding: 0,
     zIndex: 10,
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5
   },
   sideNav: {
     position: 'absolute',
@@ -35,10 +41,23 @@ export const styles = StyleSheet.create({
   backdrop: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  fullContainer: {
+  fullContainerSmall: {
     flex: 1,
+    paddingVertical: '10%',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+  },
+  fullContainerMedium: {
+    flex: 1,
+    paddingVertical: '40%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullContainerLarge: {
+    flex: 1,
+    paddingVertical: '75%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tinyLogo: {
     height: 50,
@@ -58,18 +77,39 @@ export const styles = StyleSheet.create({
     paddingTop: 10
   },
   inputSummary: {
-    backgroundColor: '#EAECF1',
+    backgroundColor: '#F5F5F5',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 5,
     color: '#6A6A6A'
   },
+  // Box with Shadow
+  boxWithShadowContainer: {
+    padding: 15,
+    backgroundColor: '#F8F8F8'
+  },
   boxWithShadow: {
+    borderWidth: 1,
+    borderColor: '#F2F2F2',
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8,
-    shadowRadius: 2,  
+    shadowRadius: 2,
     elevation: 5
+  },
+  boxHeader: {
+    paddingVertical: 15,
+    paddingHorizontal: 18,
+    backgroundColor: '#F8F8F8',
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10
+  },
+  boxBody: {
+    paddingVertical: 15,
+    paddingHorizontal: 18
   },
   // Shopping Card List
   shoppingCardsWrapper: {
@@ -90,6 +130,12 @@ export const styles = StyleSheet.create({
     borderRightWidth: 0,
     borderBottomWidth: 0,
     borderLeftWidth: 0,
+    
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2
   },
   shoppingCardEven: {
     width: (deviceWidth/2)-18,
@@ -101,6 +147,12 @@ export const styles = StyleSheet.create({
     borderRightWidth: 0,
     borderBottomWidth: 0,
     borderLeftWidth: 0,
+    
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2
   },
   shoppingCardImage: {
     height: 150,
@@ -120,9 +172,15 @@ export const styles = StyleSheet.create({
     textAlignVertical: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#398d3c',
-    borderColor: '#398d3c',
+    backgroundColor: '#53A557',
+    borderColor: '#53A557',
     borderRadius: 100,
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5
   },
 
   // Order Item List
@@ -189,6 +247,10 @@ export const styles = StyleSheet.create({
   },
 
   // react-native-collapsible
+  collapsibleWrapper: {
+    borderTopWidth: 8,
+    borderColor: '#EAECF1'
+  },
   collapsibleHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

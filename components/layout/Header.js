@@ -2,7 +2,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import PropTypes from 'prop-types'
 
 import { connect } from 'react-redux';
-import { Icon, MenuItem, OverflowMenu, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
+import { Divider, Icon, MenuItem, OverflowMenu, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 
 import { logout } from '../../actions/auth'
 import { setMenuToggler } from '../../actions/siteConfig'
@@ -32,33 +32,36 @@ const Header = ({
   }, [backLink])
 
   return (
-    <TopNavigation
-      alignment='center'
-      title='Trike'
-      subtitle={subtitle}
-      accessoryLeft={() => backLink ? (
-        <TopNavigationAction icon={props => <Icon {...props} name='arrow-back' onPress={() => navigation.navigate(backLinkComponent, backLinkOptions)}/>}/>
-      ) : (
-        sideMenu ? (
-          <TopNavigationAction icon={props => <Icon {...props} name='menu-outline' onPress={() => setMenuToggler(!sideBarToggled)}/>}/>
+    <>
+      <TopNavigation
+        alignment='center'
+        title='Trike'
+        subtitle={subtitle}
+        accessoryLeft={() => backLink ? (
+          <TopNavigationAction icon={props => <Icon {...props} name='arrow-back' onPress={() => navigation.navigate(backLinkComponent, backLinkOptions)}/>}/>
         ) : (
-          <TopNavigationAction icon={props => <Icon {...props} name='arrow-back' onPress={() => navigation.goBack()}/>}/>
-        )
-      )}
+          sideMenu ? (
+            <TopNavigationAction icon={props => <Icon {...props} name='menu-outline' onPress={() => setMenuToggler(!sideBarToggled)}/>}/>
+          ) : (
+            <TopNavigationAction icon={props => <Icon {...props} name='arrow-back' onPress={() => navigation.goBack()}/>}/>
+          )
+        )}
 
-      accessoryRight={() => (
-        <Fragment>
-          <OverflowMenu
-            anchor={() => <TopNavigationAction icon={props => <Icon {...props} name='more-vertical'/>} onPress={toggleMenu}/>}
-            visible={menuVisible}
-            placement='bottom end'
-            onBackdropPress={toggleMenu}>
-            <MenuItem accessoryLeft={props => <Icon {...props} name='info'/>} title='About'/>
-            <MenuItem accessoryLeft={props => <Icon {...props} name='log-out'/>} title='Logout' onPress={() => {toggleMenu(), logout()}}/>
-          </OverflowMenu>
-        </Fragment>
-      )}
-    />
+        accessoryRight={() => (
+          <Fragment>
+            <OverflowMenu
+              anchor={() => <TopNavigationAction icon={props => <Icon {...props} name='more-vertical'/>} onPress={toggleMenu}/>}
+              visible={menuVisible}
+              placement='bottom end'
+              onBackdropPress={toggleMenu}>
+              <MenuItem accessoryLeft={props => <Icon {...props} name='info'/>} title='About'/>
+              <MenuItem accessoryLeft={props => <Icon {...props} name='log-out'/>} title='Logout' onPress={() => {toggleMenu(), logout()}}/>
+            </OverflowMenu>
+          </Fragment>
+        )}
+      />
+      <Divider/>
+    </>
   )
 }
 
