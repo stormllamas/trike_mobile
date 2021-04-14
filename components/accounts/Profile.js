@@ -23,6 +23,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { styles } from '../common/Styles'
 
+import { locationGeocode } from '../../actions/google'
 import { addAddress, deleteAddress, getAddress, updateUser, updateAddressName, reroute } from '../../actions/auth'
 
 
@@ -66,42 +67,6 @@ const Profile = ({
 
   const ref = useRef();
   const mapRef = useRef();
-
-  const locationGeocode = async ({latLng, placeId}) => {
-    try {
-      if(latLng) {
-        const res = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.lat},${latLng.lng}&key=${GOOGLE_API_KEY}`)
-        
-        for (let i=0; i < res.data.results.length; i++) {
-          if (!res.data.results[i].formatted_address.includes('Unnamed Road')) {
-            setLatitude(latLng.lat)
-            setLongitude(latLng.lng)
-            setAddress(res.data.results[i].formatted_address)
-            setAutoCompleteText(res.data.results[i].formatted_address)
-            ref.current?.setAddressText(res.data.results[i].formatted_address)
-            ref.current?.blur()
-            break
-          }
-        }
-      } else if(placeId) {
-        const res = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`)
-        
-        for (let i=0; i < res.data.results.length; i++) {
-          if (!res.data.results[i].formatted_address.includes('Unnamed Road')) {
-            setLatitude(res.data.results[i].geometry.location.lat)
-            setLongitude(res.data.results[i].geometry.location.lng)
-            setAddress(res.data.results[i].formatted_address)
-            setAutoCompleteText(res.data.results[i].formatted_address)
-            ref.current?.setAddressText(res.data.results[i].formatted_address)
-            ref.current?.blur()
-            break
-          }
-        }
-      }
-    } catch (err) {
-      console.log('error', err)
-    }
-  }
 
   const addNewAddress = async () => {
     setUpdatingUser(true)
@@ -315,7 +280,7 @@ const Profile = ({
               ))}
             </View>
             <View style={{ marginBottom: 30 }}>
-              <Button style={{ backgroundColor:"#66BB6A", borderColor: "#66BB6A", alignSelf:'flex-start', marginBottom: 25, marginRight: 20, alignSelf: 'center', flexDirection: 'row', justifyContent: 'center' }} onPress={() => setAddressmodalActive(true)}><Ionicons name="add-outline" size={22}/> <Text style={{fontSize: 18, color: '#ffffff', fontWeight: '700' }}>Add an Address</Text></Button>
+              <Button style={ styles.addAddressButton } onPress={() => setAddressmodalActive(true)}><Ionicons name="add-outline" size={22}/> <Text style={{fontSize: 18, color: '#ffffff', fontWeight: '700' }}>Add an Address</Text></Button>
             </View>
           </ScrollView>
           
@@ -327,15 +292,21 @@ const Profile = ({
             <GooglePlacesAutocomplete
               ref={ref}
               placeholder='Search'
-              onPress={(data) => {
-                locationGeocode({ placeId: data.place_id })
+              onPress={async (data) => {
+                const res = await locationGeocode({ placeId: data.place_id })
+                setLatitude(res.data.geometry.location.lat)
+                setLongitude(res.data.geometry.location.lng)
+                setAddress(res.data.formatted_address)
+                setAutoCompleteText(res.data.formatted_address)
+                ref.current?.setAddressText(res.data.formatted_address)
+                ref.current?.blur()
               }}
               query={{
                 key: GOOGLE_API_KEY,
                 language: 'en',
                 components: 'country:ph',
                 location: "13.946958175958924, 121.61064815344236",
-                radius: "15000", //100 km
+                radius: "15000",
                 strictbounds: true,
               }}
               textInputProps={{
@@ -347,7 +318,6 @@ const Profile = ({
               // currentLocationLabel='My Current Location'
               styles={{
                 container: {
-                  // maxHeight: keyboardActive && autoCompleteFocused ? (autoCompleteText.length >= 1 ? null : 95) : 50,
                   maxHeight: keyboardActive && autoCompleteFocused && autoCompleteText.length >= 1 ? null : 50,
                   borderTopWidth: 1,
                   borderRadius: 0,
@@ -390,20 +360,32 @@ const Profile = ({
               minZoomLevel={13}
               maxZoomLevel={20}
               // customMapStyle={['c90416c7434e6e52']}
-              onPress={e => {
-                // console.log(e.nativeEvent)
+              onPress={async e => {
                 let lat = e.nativeEvent.coordinate.latitude
                 let lng = e.nativeEvent.coordinate.longitude
-                locationGeocode({ latLng: { lat, lng } })
+                const res = await locationGeocode({ latLng: { lat, lng } })
+                console.log(res.data)
+                setLatitude(lat)
+                setLongitude(lng)
+                setAddress(res.data.formatted_address)
+                setAutoCompleteText(res.data.formatted_address)
+                ref.current?.setAddressText(res.data.formatted_address)
+                ref.current?.blur()
               }}
             >
               {latitude && longitude ? (
                 <Marker
                   pinColor={'#0095FF'}
-                  onDragEnd={e => {
+                  onDragEnd={async e => {
                     let lat = e.nativeEvent.coordinate.latitude
                     let lng = e.nativeEvent.coordinate.longitude
-                    locationGeocode({ latLng: { lat, lng } })
+                    const res = await locationGeocode({ latLng: { lat, lng } })
+                    setLatitude(lat)
+                    setLongitude(lng)
+                    setAddress(res.data.formatted_address)
+                    setAutoCompleteText(res.data.formatted_address)
+                    ref.current?.setAddressText(res.data.formatted_address)
+                    ref.current?.blur()
                   }}
                   draggable
                   coordinate={{ latitude: latitude, longitude: longitude }}
@@ -431,7 +413,7 @@ const Profile = ({
               <Input
                 value={selectedAddressName}
                 label='What would you like to call this address?'
-                placeholder='Address Name'
+                placeholder='(Home, Office, Clinic, etc.)'
                 disabled={addressNameModal ? false : true}
                 onChangeText={nextValue => setSelectedAddressName(nextValue)}
                 style={{ flex: 1, marginBottom: 40 }}
@@ -460,6 +442,16 @@ const profileStyles = StyleSheet.create({
     padding: 15,
     paddingRight: 40
   },
+  addAddressButton: {
+    backgroundColor:"#66BB6A",
+    borderColor: "#66BB6A",
+    alignSelf:'flex-start',
+    marginBottom: 25,
+    marginRight: 20,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center'
+  }
 })
 
 Profile.propTypes = {

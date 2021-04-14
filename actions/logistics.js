@@ -1,6 +1,7 @@
 // import moment from 'moment'
 import { PROJECT_URL } from "@env"
 import axios from 'axios';
+import { Alert } from 'react-native'
 
 import {
   CATEGORIES_LOADING, GET_CATEGORIES,
@@ -427,6 +428,7 @@ export const foodCheckout = ({ formData, orderSeller, navigation }) => async (di
       duration_text: formData.durationText,
       duration_value: formData.durationValue,
     }
+    console.log(orderBody)
     const res = await axios.put(`${PROJECT_URL}/api/food_checkout/${orderSeller.id}/`, orderBody, tokenConfig(getState))
     if (res.data.status === "okay") {
       dispatch({ type: CHECKOUT_SUCCESS })
@@ -668,8 +670,7 @@ export const getOrderItem = ({ orderItemID }) => async (dispatch, getState) => {
     dispatch({ type: AUTH_ERROR});
   }
 }
-export const reviewProduct = ({ order_item, product_variant, userID, rating, comment, history }) => async (dispatch, getState) => {
-  $('.loader').fadeIn();
+export const reviewProduct = ({ order_item, product_variant, userID, rating, comment }) => async (dispatch, getState) => {
   const body = {
     order_item,
     product_variant,
@@ -680,40 +681,40 @@ export const reviewProduct = ({ order_item, product_variant, userID, rating, com
   try {
     const res = await axios.post(`${PROJECT_URL}/api/review_product/`, body, tokenConfig(getState));
     if (res.data.status === "okay") {
-      M.toast({
-        html: 'Product Reviewed',
-        displayLength: 5000,
-        classes: 'green'
-      });
-      // history.push('/bookings')
-      // console.log(res.data)
       dispatch({
         type: REVIEW_PRODUCT,
-        payload: res.data
+        payload: res.data,
+        orderItemId: order_item
       })
     } else if (res.data.status === "error") {
-      if (res.data.msg === "Product already reviewed") {
-        M.toast({
-          html: 'You already reviewed that',
-          displayLength: 5000,
-          classes: 'red'
-        });
-      }
-      history.push('/bookings')
+      Alert.alert(
+        "Error",
+        "'You already reviewed that'",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          { text: "OK" }
+        ]
+      );
     }
   } catch (err) {
     console.error(err)
-    M.toast({
-      html: 'You already reviewed that',
-      displayLength: 5000,
-      classes: 'red'
-    });
-    history.push('/bookings')
+    Alert.alert(
+      "Error",
+      "'You already reviewed that'",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { text: "OK" }
+      ]
+    );
   }
-  $('.loader').fadeOut();
 }
 export const reviewProductOrder = ({ order, userID, rating, comment, history }) => async (dispatch, getState) => {
-  $('.loader').fadeIn();
   const body = {
     order,
     user: userID,
@@ -723,36 +724,40 @@ export const reviewProductOrder = ({ order, userID, rating, comment, history }) 
   try {
     const res = await axios.post(`${PROJECT_URL}/api/review_order/`, body, tokenConfig(getState));
     if (res.data.status === "okay") {
-      M.toast({
-        html: 'Order Reviewed',
-        displayLength: 5000,
-        classes: 'green'
-      });
       dispatch({
         type: REVIEW_PRODUCT_ORDER,
-        payload: res.data
+        payload: res.data,
+        orderId: order
       })
     } else if (res.data.status === "error") {
-      M.toast({
-        html: 'You already reviewed that',
-        displayLength: 5000,
-        classes: 'red'
-      });
-      history.push('/bookings')
+      Alert.alert(
+        "Error",
+        "'You already reviewed that'",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          { text: "OK" }
+        ]
+      );
     }
   } catch (err) {
     console.error(err)
-    M.toast({
-      html: 'You already reviewed that',
-      displayLength: 5000,
-      classes: 'red'
-    });
-    history.push('/bookings')
+    Alert.alert(
+      "Error",
+      "'You already reviewed that'",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { text: "OK" }
+      ]
+    );
   }
-  $('.loader').fadeOut();
 }
 export const reviewOrder = ({ order, userID, rating, comment, history }) => async (dispatch, getState) => {
-  $('.loader').fadeIn();
   const body = {
     order,
     user: userID,
@@ -762,33 +767,38 @@ export const reviewOrder = ({ order, userID, rating, comment, history }) => asyn
   try {
     const res = await axios.post(`${PROJECT_URL}/api/review_order/`, body, tokenConfig(getState));
     if (res.data.status === "okay") {
-      M.toast({
-        html: 'Order Reviewed',
-        displayLength: 5000,
-        classes: 'green'
-      });
       dispatch({
         type: REVIEW_ORDER,
-        payload: res.data
+        payload: res.data,
+        orderId: order
       })
     } else if (res.data.status === "error") {
-      M.toast({
-        html: 'You already reviewed that',
-        displayLength: 5000,
-        classes: 'red'
-      });
-      history.push('/bookings')
+      Alert.alert(
+        "Error",
+        "'You already reviewed that'",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          { text: "OK" }
+        ]
+      );
     }
   } catch (err) {
     console.error(err)
-    M.toast({
-      html: 'You already reviewed that',
-      displayLength: 5000,
-      classes: 'red'
-    });
-    history.push('/bookings')
+    Alert.alert(
+      "Error",
+      "'You already reviewed that'",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { text: "OK" }
+      ]
+    );
   }
-  $('.loader').fadeOut();
 }
 
 export const syncOrder = ({ data }) => async (dispatch, getState) => {

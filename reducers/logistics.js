@@ -176,6 +176,15 @@ export default (state = initialState, action) => {
     case REVIEW_ORDER:
       return {
         ...state,
+        orders: {
+          ...state.orders,
+          results: state.orders.results.map(order => {
+            if (order.id === action.orderId) {
+              order.is_reviewed = true
+            }
+            return order
+          }),
+        },
         order: {
           ...state.order,
           is_reviewed: true,
@@ -210,6 +219,18 @@ export default (state = initialState, action) => {
     case REVIEW_PRODUCT:
       return {
         ...state,
+        orders: {
+          ...state.orders,
+          results: state.orders.results.map(order => {
+            order.order_items.map(orderItem => {
+              if (orderItem.id === action.orderItemId) {
+                orderItem.is_reviewed = true
+              }
+              return orderItem
+            })
+            return order
+          }),
+        },
         orderItem: {
           ...state.orderItem,
           is_reviewed: true,
@@ -224,6 +245,15 @@ export default (state = initialState, action) => {
     case REVIEW_PRODUCT_ORDER:
       return {
         ...state,
+        orders: {
+          ...state.orders,
+          results: state.orders.results.map(order => {
+            if (order.id === action.orderId) {
+              order.is_reviewed = true
+            }
+            return order
+          }),
+        },
         orderItem: {
           ...state.orderItem,
           order: {

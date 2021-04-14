@@ -69,7 +69,7 @@ const BookingItem = ({ ordersLoading, order, orders, index, getOrders, setOrder,
                       orderItem.is_reviewed ? (
                         <Text style={{ paddingHorizontal:10, paddingVertical: 5, backgroundColor: '#EEEEEE', width: 100 }}>Reviewed</Text>
                       ) : (
-                        <Button style={[{ backgroundColor: '#FFC107', width: 100, position: 'absolute', bottom: 0, right: 0 }]} size='small'>REVIEW</Button>
+                        <Button style={[{ backgroundColor: '#FFC107', width: 100, position: 'absolute', bottom: 0, right: 0, zIndex: 1 }]} size='small' onPress={() => navigation.navigate('ProductReview', { orderItemId: orderItem.id })}>REVIEW</Button>
                       )
                     )}
                     <Text style={{ fontSize: 12 }}>{orderItem.quantity} x ₱ {orderItem.ordered_price.toFixed(2)}</Text>

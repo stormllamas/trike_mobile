@@ -56,6 +56,11 @@ const Bookings = ({
     setCurrentOnly({
       bool: showCurrentOnly
     })
+    return () => {
+      setCurrentOnly({
+        bool: showCurrentOnly
+      })
+    }
   }, [showCurrentOnly]);
   
   useEffect(() => {
@@ -109,7 +114,7 @@ const Bookings = ({
                 Show Current Only
               </Toggle>
             </View>
-            {!ordersLoading && (
+            {!ordersLoading && orders && (
               orders.results.length > 0 ? (
                 <IOScrollView contentContainerStyle={{}}>
                   {orders.results.map((item, index) => (

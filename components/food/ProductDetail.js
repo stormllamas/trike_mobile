@@ -8,7 +8,7 @@ import FoodCart from './FoodCart'
 import RestaurantProduct from './RestaurantProduct'
 
 import { Layout, Icon, Text, Button, Radio, RadioGroup, Spinner } from '@ui-kitten/components';
-import { Dimensions, View, Image, StyleSheet, ScrollView, ImageBackground, Alert } from 'react-native'
+import { Dimensions, View, Image, StyleSheet, ScrollView, ImageBackground } from 'react-native'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
 import Ionicons from 'react-native-vector-icons/Ionicons'

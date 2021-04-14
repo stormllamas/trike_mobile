@@ -4,6 +4,12 @@ let deviceWidth = Dimensions.get('window').width
 let deviceHeight = Dimensions.get('window').height
 
 export const styles = StyleSheet.create({
+  hoverButton: {
+    position: 'absolute',
+    width: deviceWidth*.8,
+    bottom: 10,
+    left: deviceWidth*.1
+  },
   inputGroup: {
     marginBottom: 15,
   },
@@ -196,6 +202,11 @@ export const styles = StyleSheet.create({
     marginRight: 10,
     borderRadius: 50,
   },
+  orderItemImageLarge: {
+    height: 100,
+    width: 100,
+    borderRadius: 100,
+  },
 
   // Product Quantity
   productQuantity: {
@@ -249,18 +260,19 @@ export const styles = StyleSheet.create({
   // react-native-collapsible
   collapsibleWrapper: {
     borderTopWidth: 8,
-    borderColor: '#EAECF1'
+    borderColor: '#F0F4F7'
   },
   collapsibleHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: 'white',
-    padding: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
   },
   collapsibleContent: {
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#CCC",
     backgroundColor: 'white',
-    padding: 15,
+    padding: 20,
   },
 })

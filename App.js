@@ -23,7 +23,7 @@ import Login from './components/accounts/Login'
 import Profile from './components/accounts/Profile'
 import Bookings from './components/accounts/Bookings'
 import OrderReview from './components/accounts/review/OrderReview'
-// import ProductReview from './components/accounts/review/ProductReview'
+import ProductReview from './components/accounts/review/ProductReview'
 
 import Root from './components/RootStackScreen'
 
@@ -68,13 +68,13 @@ const App = () => {
             <Stack.Screen
               name="OrderReview"
               component={OrderReview}
-              options={{selectedSeller: 'selectedSeller'}}
+              options={{orderId: null}}
             />
-            {/* <Stack.Screen
+            <Stack.Screen
               name="ProductReview"
               component={ProductReview}
-              options={{selectedSeller: 'selectedSeller'}}
-            /> */}
+              options={{orderItemId: null}}
+            />
             <Stack.Screen
               name="Root"
               component={Root}

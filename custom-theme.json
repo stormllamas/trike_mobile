@@ -18,7 +18,7 @@
   "color-success-200": "#DAFDCB",
   "color-success-300": "#BFFAB0",
   "color-success-400": "#A6F59B",
-  "color-success-500": "#7EEF7A",
+  "color-success-500": "#59CD5F",
   "color-success-600": "#59CD5F",
   "color-success-700": "#3DAC4C",
   "color-success-800": "#268A3C",
@@ -73,5 +73,5 @@
   "color-danger-transparent-300": "rgba(255, 119, 117, 0.24)",
   "color-danger-transparent-400": "rgba(255, 119, 117, 0.32)",
   "color-danger-transparent-500": "rgba(255, 119, 117, 0.4)",
-  "color-danger-transparent-600": "rgba(255, 119, 117, 0.48)",
+  "color-danger-transparent-600": "rgba(255, 119, 117, 0.48)"
 }

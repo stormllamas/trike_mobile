@@ -13,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { styles } from '../common/Styles'
 
+import { getDistance } from '../../actions/google'
 import { getAddress } from '../../actions/auth'
 import { getCurrentOrder, deleteOrderItem, foodCheckout, changeQuantity } from '../../actions/logistics'
 
@@ -71,58 +72,37 @@ const FoodCart = ({
   const [personalDetailsActivated, setPersonalDetailsActivated] = useState(false)
   const [addressDetailsActivated, setAddressDetailsActivated] = useState(false)
 
-  const [address, setAddress] = useState("");
-  const [selectedAddressIndex, setSelectedAddressIndex] = useState(new IndexPath(0));
+  const [deliveryAddressId, setDeliveryAddressId] = useState('');
+  const [deliveryAddressIndex, setDeliveryAddressIndex] = useState(new IndexPath(0));
 
-  useEffect(() => {
-    user.addresses.forEach((address, index) => {
-      if (index == selectedAddressIndex.row) {
-        setAddress(address.id)
-      }
-    })
-  }, [selectedAddressIndex])
 
   const [modalAnim, setModalAnim] = useState(new Animated.Value(Dimensions.get('window').height))
-  
-  const addressSelected = async () => {
-    let addressInfo;
-    try {
-      addressInfo = await getAddress(address)
-    } catch (error) {
-      navigation.navigate("Login")
+  useEffect(() => {
+    if (foodCartActive) {
+      Animated.timing(
+        modalAnim,
+        {
+          toValue: 0,
+          duration: 400,
+          easing: Easing.elastic(),
+          useNativeDriver: false,
+        }
+      ).start();
+    } else {
+      Animated.timing(
+        modalAnim,
+        {
+          toValue: Dimensions.get('window').height,
+          duration: 400,
+          easing: Easing.elastic(),
+          useNativeDriver: false,
+        }
+      ).start();
     }
-    setDeliveryLat(addressInfo.latitude)
-    setDeliveryLng(addressInfo.longitude)
-    setDeliveryAddress(addressInfo.address)
+  }, [modalAnim, foodCartActive])
 
-    const origin = `${pickupLat},${pickupLng}`;
-    const destination = `${addressInfo.latitude},${addressInfo.longitude}`;
-  
-    try {
-      const res = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${GOOGLE_API_KEY}`)
-      if (res.data.status === 'OK' && res.data.rows[0].elements[0].distance) {
-        const distanceString = res.data.rows[0].elements[0].distance.text
-        const distanceValue = res.data.rows[0].elements[0].distance.value
-        const durationString = res.data.rows[0].elements[0].duration.text
-        const durationValue = res.data.rows[0].elements[0].duration.value
-        setDistanceText(distanceString);
-        setDistanceValue(distanceValue);
-        setDurationText(durationString);
-        setDurationValue(durationValue);
-        
-        let perKmTotal = Math.round((parseInt(distanceValue)/1000)*siteInfo.vehicles.filter(vehicle => vehicle.name === 'motorcycle')[0].per_km_price)
-        let total = siteInfo.shipping_base+perKmTotal
-        setDelivery(Math.round(total))
-      }
-    } catch (err) {
-      console.log('error', err.data)
-    }
-  }
-
-  const proceedToPayments = async e => {
-    e.preventDefault();
-
-    if(currentOrder.count < 1 && address === '' && !delivery && !lastName && !firstName && !contact && !email ? false : true) {
+  const proceedToPayments = async () => {
+    if(currentOrder.count < 1 && deliveryAddressId === '' && !delivery && !lastName && !firstName && !contact && !email ? false : true) {
       const formData = {
         vehicleChoice: siteInfo.vehicles.filter(vehicle => vehicle.name === 'motorcycle')[0].id,
         firstName, lastName, contact, email,
@@ -140,12 +120,49 @@ const FoodCart = ({
     }
   }
   
+  const addressSelected = async () => {
+    const addressInfo = await getAddress(deliveryAddressId)
+    const origin = `${pickupLat},${pickupLng}`;
+    const destination = `${addressInfo.latitude},${addressInfo.longitude}`;
+    const res = await getDistance({ origin, destination })
+
+    setDeliveryLat(addressInfo.latitude)
+    setDeliveryLng(addressInfo.longitude)
+    setDeliveryAddress(addressInfo.address)
+    setDistanceText(res.data.distanceText);
+    setDistanceValue(res.data.distanceValue);
+    setDurationText(res.data.durationText);
+    setDurationValue(res.data.durationValue);
+
+    let perKmTotal = Math.round((parseInt(res.data.distanceValue)/1000)*siteInfo.vehicles.filter(vehicle => vehicle.name === 'motorcycle')[0].per_km_price)
+    let total = siteInfo.shipping_base+perKmTotal
+    setDelivery(Math.round(total))
+  }
+
   useEffect(() => {
-    if (address) {
+    if(deliveryAddressIndex.row > 0) {
+      user.addresses.forEach((address, index) => {
+      if (index == deliveryAddressIndex.row-1) {
+        setDeliveryAddressId(address.id)
+      }})
+    } else {
+      setDeliveryAddressId('')
+      setDeliveryLat('')
+      setDeliveryLng('')
+      setDeliveryAddress('')
+      setDistanceText('');
+      setDistanceValue('');
+      setDurationText('');
+      setDurationValue('');
+      setDelivery('')
+    }
+  }, [deliveryAddressIndex])
+  useEffect(() => {
+    if (deliveryAddressId) {
       addressSelected()
     }
-  }, [address]);
-  
+  }, [deliveryAddressId]);
+
   useEffect(() => {
     if (!userLoading && isAuthenticated) {
       getCurrentOrder({
@@ -172,39 +189,13 @@ const FoodCart = ({
   useEffect(() => {
     if (!currentOrderLoading && currentOrder !== null) {
       setDescription(currentOrder.description ? currentOrder.description : "")
-    } else {
     }
     return () => {
       if (!currentOrderLoading && currentOrder !== null) {
         setDescription(currentOrder.description ? currentOrder.description : "")
-      } else {
       }
     }
   }, [currentOrderLoading]);
-  
-  useEffect(() => {
-    if (foodCartActive) {
-      Animated.timing(
-        modalAnim,
-        {
-          toValue: 0,
-          duration: 400,
-          easing: Easing.elastic(),
-          useNativeDriver: false,
-        }
-      ).start();
-    } else {
-      Animated.timing(
-        modalAnim,
-        {
-          toValue: Dimensions.get('window').height,
-          duration: 400,
-          easing: Easing.elastic(),
-          useNativeDriver: false,
-        }
-      ).start();
-    }
-  }, [modalAnim, foodCartActive])
   
   return (
     isAuthenticated && !user.groups.includes('rider') && (
@@ -221,10 +212,10 @@ const FoodCart = ({
                   <TouchableHighlight onPress={() => setPersonalDetailsActivated(!personalDetailsActivated)}>
                     <View style={styles.collapsibleHeader}>
                       <Text category="h6" style={{ fontSize: 16, fontFamily: 'Lato-Bold' }}>Personal Details</Text>
-                      <Ionicons name={personalDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
+                      <Ionicons name={!personalDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
                     </View>
                   </TouchableHighlight>
-                  <Collapsible collapsed={personalDetailsActivated} duration={150} align="center">
+                  <Collapsible collapsed={!personalDetailsActivated} duration={150} align="center">
                     <View style={styles.collapsibleContent}>
                       <Input
                         value={firstName}
@@ -277,17 +268,26 @@ const FoodCart = ({
                   <Collapsible collapsed={addressDetailsActivated} duration={150} align="center">
                     <View style={styles.collapsibleContent}>
                       <Select
-                        value={user.addresses[selectedAddressIndex.row].name}
-                        selectedIndex={selectedAddressIndex}
+                        value={deliveryAddressIndex.row > 0 ? user.addresses[deliveryAddressIndex.row-1].name : '-Select an Address-'}
+                        selectedIndex={deliveryAddressIndex}
                         style={{ backgroundColor: 'white'}}
-                        onSelect={index => setSelectedAddressIndex(index)}>
-                        {user && (
-                          user.addresses.map(address => (
-                            <SelectItem key={address.id} title={address.name ? address.name : `Unnamed Address: ${address.address}`}/>
-                          ))
-                        )}
+                        onSelect={index => setDeliveryAddressIndex(index)}>
+                        <SelectItem title='-Select an Address-'/>
+                        {user && user.addresses.map(address => (
+                          <SelectItem key={address.id} title={address.name ? address.name : `Unnamed Address: ${address.address}`}/>
+                        ))}
                       </Select>
-                      <Text style={[styles.mute, styles.small, { marginTop: 5, paddingLeft: 15 }]}>{user.addresses[selectedAddressIndex.row].address}</Text>
+                      {delivery && deliveryAddressId ? (
+                        <View style={[{ marginLeft: 5 }]}>
+                          <Text style={[{ fontFamily: 'Lato-Bold', marginTop: 5 }]}>₱ {delivery.toFixed(2)} <Text style={[styles.mute, styles.small, { marginTop: 5 }]}>Delivery</Text></Text>
+                          <Text style={[styles.mute, styles.small, { marginTop: 5 }]}>{deliveryAddressIndex.row > 0 ? user.addresses[deliveryAddressIndex.row-1].address : 'No address selected'}</Text>
+                        </View>
+                      ): (
+                        <View style={[{ marginLeft: 5 }]}>
+                          <Text style={[styles.mute, { fontFamily: 'Lato-Bold', marginTop: 5 }]}>-</Text>
+                          <Text style={[styles.mute, styles.small, { marginTop: 5 }]}>{deliveryAddressIndex.row > 0 ? user.addresses[deliveryAddressIndex.row-1].address : 'No address selected'}</Text>
+                        </View>
+                      )}
                       <Input
                         value={description}
                         label='Order Notes'
@@ -336,13 +336,14 @@ const FoodCart = ({
                 </View>
               </ScrollView>
               <Button
-                style={[foodCardStyles.checkoutButton]}
-                disabled={currentOrder.count < 1 || address === '' || !delivery || !lastName || !firstName || !contact || !email ? true : false}
+                // style={[foodCardStyles.checkoutButton]}
+                style={{ marginBottom: 25, borderRadius: 0 }}
+                disabled={currentOrder.count < 1 || deliveryAddressId === '' || !delivery || !lastName || !firstName || !contact || !email ? true : false}
                 onPress={proceedToPayments}
               >
                 CHECKOUT
               </Button>
-              <Text style={[foodCardStyles.checkoutFloatText, {fontFamily: 'Lato-Bold'}]}>{currentOrder.count < 1 || address === '' || !delivery || !lastName || !firstName || !contact || !email ? '' : `₱${(parseFloat(currentOrder.subtotal)+parseFloat(delivery)).toFixed(2)}` }</Text>
+              <Text style={[foodCardStyles.checkoutFloatText, {fontFamily: 'Lato-Bold'}]}>{currentOrder.count < 1 || deliveryAddressId === '' || !delivery || !lastName || !firstName || !contact || !email ? '' : `₱${(parseFloat(currentOrder.subtotal)+parseFloat(delivery)).toFixed(2)}` }</Text>
               {quantityLoading || currentOrderLoading || deleteLoading || siteInfoLoading || userLoading ? (
                 <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
                   <Spinner size='large'/>

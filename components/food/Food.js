@@ -175,7 +175,7 @@ const Food = ({
                 <Card style={index % 2 === 0 ? styles.shoppingCardOdd : styles.shoppingCardEven}>
                   <Text style={{ fontSize: 16, fontWeight: '700', minHeight: 200 }}></Text>
                   <View style={{ marginLeft: -2, marginTop: 5, flexDirection: 'row' }}>
-                    {[...Array(0).keys()].map(star => <Icon key={star} name='star' fill='#F2BE4D' style={{ height: 23, width: 23}}>star</Icon>)}
+                    {[...Array(0).keys()].map(star => <Icon key={star} name='star' fill='#E0E0E0' style={{ height: 23, width: 23}}>star</Icon>)}
                   </View>
                 </Card>
               </TouchableOpacity>
