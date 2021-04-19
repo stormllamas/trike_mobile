@@ -6,7 +6,7 @@ import { GOOGLE_API_KEY, PROJECT_URL } from "@env"
 import { styles } from '../common/Styles'
 
 import { Layout, Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation, Spinner, Divider } from '@ui-kitten/components';
-import { Keyboard, Animated, Easing, Dimensions, View, TouchableHighlight, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native'
+import { Keyboard, Animated, Easing, Dimensions, Alert, View, TouchableHighlight, TouchableOpacity, Image, StyleSheet, ScrollView, Platform } from 'react-native'
 
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import Collapsible from 'react-native-collapsible';
@@ -20,7 +20,7 @@ import Header from '../layout/Header'
 
 import { locationGeocode, getDistance } from '../../actions/google'
 import { reroute, getAddress } from '../../actions/auth'
-import { getCurrentOrder } from '../../actions/logistics'
+import { getCurrentOrder, confirmDelivery } from '../../actions/logistics'
 
 
 const Delivery = ({
@@ -37,14 +37,10 @@ const Delivery = ({
     currentOrderLoading,
     currentOrder,
   },
-  seller,
-  foodCartActive, setFoodCartActive,
 
   getCurrentOrder,
-  changeQuantity,
-  deleteOrderItem,
   getAddress,
-  foodCheckout,
+  confirmDelivery,
   navigation,
 }) => {
   const [rendered, setRendered] = useState(false);
@@ -98,8 +94,9 @@ const Delivery = ({
   const [durationText, setDurationText] = useState("");
   const [durationValue, setDurationValue] = useState("");
 
-  // const [promoCode, setPromoCode] = useState('');
-  // const [promoCodeSet, setPromoCodeSet] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoCodeSet, setPromoCodeSet] = useState(false);
+  const [promoCodeRetrieved, setPromoCodeRetrieved] = useState('');
 
   const [personalDetailsActivated, setPersonalDetailsActivated] = useState(false)
 
@@ -194,6 +191,119 @@ const Delivery = ({
       setDelivery(Math.round(total))
     }
   }
+
+  const proceedToPayment = async () => {
+    if (!firstName || !lastName || !contact || !email ? true : false) {
+      Alert.alert(
+        "Whoops!",
+        'Please complete personal details',
+        [
+          { text: "OK" }
+        ]
+      );
+    } else if (!pickupLat || !pickupLng || !pickupAddress) {
+      Alert.alert(
+        "Whoops!",
+        'Please setup pickup address',
+        [
+          { text: "OK" }
+        ]
+      );
+    } else if (!deliveryLat || !deliveryLng || !deliveryAddress) {
+      Alert.alert(
+        "Whoops!",
+        'Please setup delivery address',
+        [
+          { text: "OK" }
+        ]
+      );
+    } else if (!description) {
+      Alert.alert(
+        "Whoops!",
+        'Please provide delivery notes',
+        [
+          { text: "OK" }
+        ]
+      );
+    } else {
+      const formData = {
+        vehicleChoice,
+        firstName, lastName, contact, email, gender: selectedGenderIndex === 0 ? 'male' : 'female',
+        pickupLat, pickupLng, pickupAddress,
+        deliveryLat, deliveryLng, deliveryAddress,
+        distanceText, distanceValue, durationText, durationValue,
+        riderPaymentNeeded,
+        twoWay,
+        unit, weight, height, width, length, description,
+        promoCode: promoCodeSet && promoCodeRetrieved ? promoCodeRetrieved.id : false
+      }
+      confirmDelivery({
+        formData,
+        navigation
+      })
+    }
+  }
+
+  const promoCodeButtonClicked = () => {
+    if (promoCodeSet) {
+      setPromoCode('')
+      setPromoCodeSet(false)
+      setPromoCodeRetrieved('')
+    } else {
+      // Check if Promo code exists
+      if(siteInfo.promo_code_list.map(promo_code => promo_code.code.toLowerCase()).includes(promoCode.toLowerCase())) {
+        let promoCodeUsed = siteInfo.promo_code_list.filter(promo_code => promo_code.code.toLowerCase() === promoCode.toLowerCase())[0]
+        // Check if active
+        if (promoCodeUsed.promo_code_active) {
+          if (promoCodeUsed.reusable) {
+            setPromoCodeSet(promoCodeUsed.id)
+            Alert.alert(
+              "Success",
+              "Promo Code Set!",
+              [
+                { text: "OK" }
+              ]
+            );
+          } else {
+            if (!user.promo_codes_used.includes(promoCodeUsed.code)) {
+              setPromoCodeSet(promoCodeUsed.id)
+              Alert.alert(
+                "Success",
+                "Promo Code Set!",
+                [
+                  { text: "OK" }
+                ]
+              );
+            } else {
+              Alert.alert(
+                "Error",
+                "Code already used",
+                [
+                  { text: "OK" }
+                ]
+              );
+            }
+          }
+        } else {
+          Alert.alert(
+            "Error",
+            "Invalid Promo Code",
+            [
+              { text: "OK" }
+            ]
+          );
+        }
+      } else {
+        Alert.alert(
+          "Error",
+          "Invalid Promo Code",
+          [
+            { text: "OK" }
+          ]
+        );
+      }
+    }
+  }
   
   useEffect(() => {
     if (pickupAddressIndex.row > 0) {
@@ -254,7 +364,6 @@ const Delivery = ({
       }})
     } else {
       if (modalActive !== 'pickup' && modalActive !== 'delivery') {
-        console.log('clear delivery')
         setDeliveryAddressId('')
         setDeliveryLat('')
         setDeliveryLng('')
@@ -319,6 +428,19 @@ const Delivery = ({
       ).start();
     }
   }, [modalAnim, modalActive])
+
+  // Promocode UseEffects
+  useEffect(() => {
+    if (promoCodeSet) {
+      let promoCodeUsed = siteInfo.promo_code_list.filter(promo_code => promo_code.code.toLowerCase() === promoCode.toLowerCase())[0]
+      setPromoCodeRetrieved(promoCodeUsed)
+      // setDelivery(Math.round(delivery*(1-promoCodeUsed.delivery_discount)))
+    } else {
+      // let perKmTotal = Math.round((parseInt(distanceValue)/1000)*siteInfo.vehicles.filter(vehicle => vehicle.name === 'motorcycle')[0].per_km_price)
+      // let total = siteInfo.shipping_base+perKmTotal
+      // setDelivery(Math.round(total))
+    }
+  }, [promoCodeSet]);
 
   useEffect(() => {
     if (!userLoading && isAuthenticated) {
@@ -491,6 +613,24 @@ const Delivery = ({
                 </Collapsible>
               </View>
               
+
+              <View style={styles.collapsibleWrapper}>
+                <View style={[styles.collapsibleHeader, { flexDirection: 'column' }]}>
+                  <Text category="h6" style={[ deliveryStyles.promptTitle ]}>Delivery Notes</Text>
+                  <Text style={[styles.mute, styles.small]}>Give us some notes or instructions about your delivery, that you would like us to know beforehand</Text>
+                  <Input
+                    value={description}
+                    // label='Order Notes'
+                    multiline={true}
+                    textStyle={{ minHeight: 85, textAlignVertical : 'top' }}
+                    placeholder='Leave us some notes'
+                    onChangeText={nextValue => {nextValue.length < 4001 && setDescription(nextValue)}}
+                    style={{ backgroundColor: 'white', marginTop: 10 }}
+                  />
+                  <Text style={[styles.small, {alignSelf: 'flex-end'}]}>{description.length}/4000</Text>
+                </View>
+              </View>
+              
               <View style={[styles.collapsibleWrapper]}>
                 <TouchableHighlight onPress={() => {
                   setPersonalDetailsActivated(!personalDetailsActivated)
@@ -545,7 +685,28 @@ const Delivery = ({
                   </View>
                 </Collapsible>
               </View>
+
               <View style={[styles.collapsibleWrapper]}>
+                <View style={[styles.collapsibleContent, {borderWidth: 0, flexDirection: 'row'}]}>
+                  <Input
+                    value={promoCode}
+                    // label='Enter Promo Code'
+                    disabled={promoCodeSet || !delivery}
+                    placeholder='Enter a promo code'
+                    onChangeText={nextValue => setPromoCode(nextValue.toUpperCase())}
+                    keyboardType={Platform.OS === 'ios' ? 'default' : 'visible-password'}
+                    style={{ backgroundColor: 'white', flex: 1, marginRight: 10, marginTop: 5 }}
+                  />
+                  <Button
+                    // style={[{ backgroundColor: promoCodeSet ? '#DB555F' : (!delivery ? '#959595' : '#59CD5F')}, {color: '#FFFFFF'} ]}
+                    disabled={!delivery}
+                    onPress={promoCodeButtonClicked}
+                    status={promoCodeSet ? 'danger' : 'success'}
+                  >
+                    {promoCodeSet ? 'REMOVE' : 'APPLY'}
+                  </Button>
+                </View>
+                <Divider/>
                 <View style={[styles.collapsibleContent, {marginBottom: 100, borderWidth: 0}]}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
                     <Text style={[styles.mute, { fontSize: 14 }]}>Delivery</Text>
@@ -553,27 +714,26 @@ const Delivery = ({
                   </View>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
                     <Text style={[styles.mute, { fontSize: 14 }]}>Promo discount</Text>
-                    {/* <Text>{delivery ? `-₱${delivery.toFixed(2)}` : '-0.00' }</Text> */}
-                    <Text>- ₱0.00</Text>
+                    <Text>{promoCodeSet && promoCodeRetrieved ? `₱${Math.round((promoCodeRetrieved.delivery_discount*delivery)).toFixed(2)}` : '-0.00' }</Text>
                   </View>
                   <Divider/>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 15 }}>
                     <Text style={[styles.mute]}>Subtotal</Text>
                     {/* <Text>{delivery ? `-₱${delivery.toFixed(2)}` : '-0.00' }</Text> */}
-                    <Text style={{ fontFamily: 'Lato-Black', fontSize: 20 }}>{delivery ? `₱${delivery.toFixed(2)}` : '₱0.00' }</Text>
+                    <Text style={{ fontFamily: 'Lato-Black', fontSize: 20 }}>{delivery ? (promoCodeSet && promoCodeRetrieved ? `₱${Math.round((delivery*(1-promoCodeRetrieved.delivery_discount))-.1).toFixed(2)}` : `₱${delivery.toFixed(2)}`) : '₱0.00' }</Text>
                   </View>
                 </View>
               </View>
             </ScrollView>
             <Button
               style={[ styles.hoverButton ]}
-              disabled={!vehicleChoice || !delivery || !lastName || !firstName || !contact || !email ? true : false}
-              onPress={() => console.log('Food Checkout')}
+              // disabled={!vehicleChoice || !delivery || !lastName || !firstName || !contact || !email ? true : false}
+              onPress={proceedToPayment}
               status="success"
             >
               Confirm Booking
             </Button>
-            <Text style={[deliveryStyles.checkoutFloatText, {fontFamily: 'Lato-Bold'}]}>{ !vehicleChoice || !delivery || !lastName || !firstName || !contact || !email ? '' : `₱${(parseFloat(currentOrder.subtotal)+parseFloat(delivery)).toFixed(2)}` }</Text>
+            <Text style={[deliveryStyles.checkoutFloatText, {fontFamily: 'Lato-Bold'}]}>{ !vehicleChoice || !delivery || !lastName || !firstName || !contact || !email ? '' : `${promoCodeSet && promoCodeRetrieved ? `₱${Math.round(delivery*(1-promoCodeRetrieved.delivery_discount)).toFixed(2)}` : `₱${delivery.toFixed(2)}`}` }</Text>
             <Animated.View style={[styles.superModal, { top: modalAnim, height: Dimensions.get('window').height-80  }]}>
               <TopNavigation
                 accessoryLeft={() => <TopNavigationAction onPress={() => setModalActive('')} icon={props => <Icon {...props} name='arrow-back'/>}/>}
@@ -773,6 +933,7 @@ const deliveryStyles = StyleSheet.create({
 Delivery.propTypes = {
   getCurrentOrder: PropTypes.func.isRequired,
   getAddress: PropTypes.func.isRequired,
+  confirmDelivery: PropTypes.func.isRequired,
 }
 
 const mapStateToProps = state => ({
@@ -781,4 +942,4 @@ const mapStateToProps = state => ({
   logistics: state.logistics,
 });
 
-export default connect(mapStateToProps, { getCurrentOrder, getAddress })(Delivery);
+export default connect(mapStateToProps, { getCurrentOrder, getAddress, confirmDelivery })(Delivery);

@@ -5,7 +5,7 @@ import { useBackButton } from '../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 
 
-import { Icon, Text, Button, Spinner, Card } from '@ui-kitten/components';
+import { Divider, Icon, Text, Button, Spinner, Card } from '@ui-kitten/components';
 import { Dimensions, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
 
 import Collapsible from 'react-native-collapsible';
@@ -19,26 +19,12 @@ import { styles } from '../common/Styles'
 
 
 
-const FoodPayment = ({
-  auth: {
-    user,
-    userLoading,
-    isAuthenticated,
-  },
-  siteConfig: {
-    siteInfoLoading,
-    siteInfo
-  },
+const DeliveryPayment = ({
+  auth: { isAuthenticated },
   logistics: { 
     currentOrderLoading,
     currentOrder,
-
-    productLoading,
-    product,
-
-    quantityLoading,
-    deleteLoading,
-    checkoutLoading,
+    completeOrderLoading
   },
   getCurrentOrder,
   proceedWithCOD,
@@ -47,7 +33,9 @@ const FoodPayment = ({
   route,
 }) => {
 
-  const [personalDetailsActivated, setPersonalDetailsActivated] = useState(false)
+  const [socket, setSocket] = useState('')
+
+  const [otherDetails, setOtherDetails] = useState(false)
   const [orderSummaryActivated, setOrderSummaryActivated] = useState(false)
   const [paymentOptionsActivated, setPaymentOptionsActivated] = useState(false)
 
@@ -56,51 +44,21 @@ const FoodPayment = ({
     return true
   }
   useBackButton(handleBackButtonClick)
-  
-  const checkCurrentOrder = CO => {
-    if (CO.first_name !== null && CO.last_name !== null && CO.contact !== null && CO.email !== null && CO.gender !== null && CO.loc1_latitude !== null && CO.loc1_longitude !== null && CO.loc1_address !== null && CO.loc2_latitude !== null && CO.loc2_longitude !== null && CO.loc2_address !== null) {
-      return true
-    } else {
-      return false
-    }
-  }
 
   useEffect(() => {
-    getCurrentOrder({
-      type: 'food',
-      query: `?order_seller_name=${route.params.selectedSeller}&for_checkout=true`
-    })
+    isAuthenticated && (
+      getCurrentOrder({
+        type: 'delivery',
+        query: '?for_checkout=true'
+      })
+    )
   }, [])
-
-  useEffect(() => {
-    if(!currentOrderLoading) {
-      if (currentOrder) {
-        if (checkCurrentOrder(currentOrder)) {
-        } else {
-          Alert.alert(
-            "Error",
-            "Checkout session expired",
-            [
-              {
-                text: "Cancel",
-                style: "cancel"
-              },
-              { text: "OK" }
-            ]
-          );
-        }
-        if (!currentOrder.has_valid_item) {
-          navigation.navigate('RestaurantDetail', { selectedSeller: route.params.selectedSeller })
-        }
-      }
-    }
-  }, [currentOrderLoading])
 
 
   return (
-    isAuthenticated && !currentOrderLoading && currentOrder ? (
+    isAuthenticated && currentOrder ? (
       <>
-        <Header subtitle='Food Checkout' backLink={{component:'RestaurantDetail', options: {selectedSeller: route.params.selectedSeller }}} navigation={navigation}/>
+        <Header backLink={{component:'Root', options: {screen : 'Food'}}} subtitle='Delivery Checkout' navigation={navigation}/>
         <ScrollView>
           <View style={styles.boxWithShadowContainer}>
             <View style={ styles.boxWithShadow }>
@@ -118,16 +76,16 @@ const FoodPayment = ({
                   <Text style={[styles.mute]}>{currentOrder.loc2_address}</Text>
                 </View>
                 <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Subtotal</Text>
-                  <Text style={[styles.mute]}>₱ {currentOrder.checkout_subtotal.toFixed(2)}</Text>
-                </View>
-                <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
-                  <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Shipping</Text>
+                  <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Shipping Total</Text>
                   <Text style={[styles.mute]}>₱ {currentOrder.shipping.toFixed(2)}</Text>
                 </View>
-                <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
+                {/* <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
                   <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Order Total</Text>
                   <Text style={[{fontFamily: 'Lato-Bold'}]}>₱ {currentOrder.checkout_total.toFixed(2)}</Text>
+                </View> */}
+                <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
+                  <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Order Notes</Text>
+                  <Text style={[styles.inputSummary, {minHeight: 75}]}>{currentOrder.description}</Text>
                 </View>
               </View>
             </View>
@@ -145,9 +103,8 @@ const FoodPayment = ({
                 <View style={styles.boxBody}>
                   <Button style={foodPaymentStyles.CODButton} onPress={() => {
                     proceedWithCOD({
+                      type: 'delivery',
                       navigation,
-                      type: 'food',
-                      query: `?order_seller=${currentOrder.seller.id}`,
                       // socket: socket,
                     })
                   }}>Proceed with COD</Button>
@@ -155,47 +112,16 @@ const FoodPayment = ({
               </Collapsible>
             </View>
           </View>
-
-          <View style={styles.boxWithShadowContainer}>
-            <View style={ styles.boxWithShadow }>
-              <TouchableOpacity onPress={() => setOrderSummaryActivated(!orderSummaryActivated)}>
-                <View style={[styles.collapsibleHeader, styles.boxHeader, { backgroundColor: '#ffffff', borderColor: '#EAECF1', borderBottomWidth: 1, borderRadius:10}]}>
-                  <Text category="h6" style={{ fontSize: 16, fontFamily: 'Lato-Bold' }}>Cart Summary</Text>
-                  <Ionicons name={orderSummaryActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
-                </View>
-              </TouchableOpacity>
-              <Collapsible collapsed={orderSummaryActivated} duration={150} align="center">
-                <View style={styles.boxBody}>
-                  {currentOrder.order_items !== undefined && (
-                    currentOrder.order_items.map((orderItem, index) => (
-                      <View key={orderItem.id} style={[styles.orderItem, {color: '#606060'}, index !== 0 ? {borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5} : {} ]}>
-                        <Image style={styles.orderItemImage} source={{ uri: `${PROJECT_URL}${orderItem.product.thumbnail}`}}></Image>
-                        <View>
-                          <Text style={{ marginBottom: 5 }}>{orderItem.product.name} - {orderItem.product_variant.name}</Text>
-                          <Text style={{ fontSize: 12 }}>{orderItem.quantity} x ₱ {orderItem.product_variant.price.toFixed(2)}</Text>
-                          <Text>₱ {orderItem.total_price.toFixed(2)}</Text>
-                        </View>
-                      </View>
-                    ))
-                  )}
-                  <View>
-                    <Text style={styles.label}>Order Notes</Text>
-                    <Text style={[styles.inputSummary, {minHeight: 75}]}>{currentOrder.description}</Text>
-                  </View>
-                </View>
-              </Collapsible>
-            </View>
-          </View>
           
           <View style={styles.boxWithShadowContainer}>
             <View style={ styles.boxWithShadow }>
-              <TouchableOpacity onPress={() => setPersonalDetailsActivated(!personalDetailsActivated)}>
+              <TouchableOpacity onPress={() => setOtherDetails(!otherDetails)}>
                 <View style={[styles.collapsibleHeader, styles.boxHeader, { backgroundColor: '#ffffff', borderColor: '#EAECF1', borderBottomWidth: 1, borderRadius:10}]}>
-                  <Text category="h6" style={{ fontSize: 16, fontFamily: 'Lato-Bold' }}>Personal Details</Text>
-                  <Ionicons name={personalDetailsActivated ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
+                  <Text category="h6" style={{ fontSize: 16, fontFamily: 'Lato-Bold' }}>Show Other Details</Text>
+                  <Ionicons name={otherDetails ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
                 </View>
               </TouchableOpacity>
-              <Collapsible collapsed={personalDetailsActivated} duration={150} align="center">
+              <Collapsible collapsed={otherDetails} duration={150} align="center">
                 <View style={styles.boxBody}>
                   <View>
                     <Text style={styles.label}>First Name</Text>
@@ -216,6 +142,25 @@ const FoodPayment = ({
                   <View>
                     <Text style={styles.label}>Gender</Text>
                     <Text style={[styles.inputSummary]}>{currentOrder.gender}</Text>
+                  </View>
+                </View>
+                <Divider/>
+                <View style={styles.boxBody}>
+                  <View>
+                    <Text style={styles.label}>Item Weight</Text>
+                    <Text style={[styles.inputSummary]}>{currentOrder.weight}{currentOrder.unit}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.label}>Item Height</Text>
+                    <Text style={[styles.inputSummary]}>{currentOrder.height}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.label}>Item Width</Text>
+                    <Text style={[styles.inputSummary]}>{currentOrder.width}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.label}>Item Length</Text>
+                    <Text style={[styles.inputSummary]}>{currentOrder.length}</Text>
                   </View>
                 </View>
               </Collapsible>
@@ -245,7 +190,7 @@ const foodPaymentStyles = StyleSheet.create({
   },
 })
 
-FoodPayment.propTypes = {
+DeliveryPayment.propTypes = {
   getCurrentOrder: PropTypes.func.isRequired,
   proceedWithCOD: PropTypes.func.isRequired,
 }
@@ -256,4 +201,4 @@ const mapStateToProps = state => ({
   logistics: state.logistics,
 });
 
-export default connect(mapStateToProps, { getCurrentOrder, proceedWithCOD })(FoodPayment);
+export default connect(mapStateToProps, { getCurrentOrder, proceedWithCOD })(DeliveryPayment);

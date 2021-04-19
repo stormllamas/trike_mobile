@@ -19,7 +19,7 @@ import { styles } from '../common/Styles'
 
 
 
-const BookingItem = ({ ordersLoading, order, orders, index, getOrders, setOrder, setOrderToDelete, navigation }) => {
+const BookingItem = ({ ordersLoading, order, orders, index, getOrders, setOrder, setOrderModalActive, setOrderToDelete, setDeleteModalActive, navigation }) => {
 
   const lastProductElement = (inView) => {
     if (inView && orders.results.length == index+1 && orders.next !== null && !ordersLoading) {
@@ -27,6 +27,11 @@ const BookingItem = ({ ordersLoading, order, orders, index, getOrders, setOrder,
         getMore: true
       });
     }
+  }
+
+  const deletePressed = () => {
+    setOrderToDelete(order.id)
+    setDeleteModalActive(true)
   }
 
   return (
@@ -39,7 +44,7 @@ const BookingItem = ({ ordersLoading, order, orders, index, getOrders, setOrder,
           </View>
           {!order.is_delivered ? (
             !order.is_canceled ? (
-              <Button style={[{ borderRadius: 50 }]} size='small'>Status</Button>
+              <Button style={[{ borderRadius: 50 }]} size='small' onPress={() => {setOrder(order); setOrderModalActive(true)}}>Status</Button>
             ) : (
               <Text style={[styles.mute, { fontFamily: 'Lato-Bold', alignSelf: 'center' }]}>Order Canceled</Text>
             )
@@ -117,26 +122,37 @@ const BookingItem = ({ ordersLoading, order, orders, index, getOrders, setOrder,
           </View>
           
           {order.order_type === 'food' && (
-            <View style={{ marginTop: 10 }}>
+            <View style={{ marginVertical: 10 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Subtotal</Text>
+                <Text style={[styles.mute, { fontFamily: 'Lato-Bold', marginBottom:5 }]}>Subtotal</Text>
                 <Text>₱ {order.ordered_subtotal.toFixed(2)}</Text>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Shipping</Text>
+                <Text style={[styles.mute, { fontFamily: 'Lato-Bold', marginBottom:5 }]}>Shipping</Text>
                 <Text>₱ {order.ordered_shipping.toFixed(2)}</Text>
               </View>
             </View>
           )}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5, fontSize: 17 }}>Total</Text>
+            <Text style={[styles.mute, { fontFamily: 'Lato-Bold', marginBottom:5, fontSize: 18 }]}>Total</Text>
             <Text style={{ fontFamily: 'Lato-Bold', fontSize: 18 }}>₱ {order.ordered_total.toFixed(2)}</Text>
           </View>
 
-          <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
-            <Text style={[{ fontFamily: 'Lato-Black', marginTop:5 }, order.order_type === 'ride_hail' && { color: '#4CAF50'}, order.order_type === 'delivery' && { color: '#2196F3'}, order.order_type === 'food' && { color: '#FAA634'}]}>{ order.order_type.replace('_', ' ').toUpperCase()}</Text>
+          <View style={{ borderColor: '#EAECF1', borderTopWidth: 1 }}>
+            <Text onPress={() => {setOrder(order); setOrderModalActive(true)}} style={[{ fontFamily: 'Lato-Black', marginTop:5, marginTop: 15 }, order.order_type === 'ride_hail' && { color: '#4CAF50'}, order.order_type === 'delivery' && { color: '#2196F3'}, order.order_type === 'food' && { color: '#FAA634'}]}>{ order.order_type.replace('_', ' ').toUpperCase()}</Text>
           </View>
         </View>
+        {!order.is_claimed && !order.is_canceled && (
+          <>
+            <Divider/>
+            <View style={[styles.boxBody, { backgroundColor: '#F8F8F8', borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }]}>
+              <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center'}} onPress={() => deletePressed()}>
+                <Ionicons name="close-outline" size={26} color={'#959595'}/>
+                <Text style={[styles.mute, { fontSize: 14 }]}>CANCEL BOOKING</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
     </InView>
   )

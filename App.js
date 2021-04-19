@@ -31,10 +31,24 @@ import RestaurantDetail from './components/food/RestaurantDetail'
 import ProductDetail from './components/food/ProductDetail'
 import FoodPayment from './components/food/FoodPayment'
 
+import DeliveryPayment from './components/delivery/DeliveryPayment'
+
 import { loadUser } from './actions/auth'
 import { loadSite } from './actions/siteConfig'
 
 const Stack = createStackNavigator();
+
+
+  
+const linking = {
+  prefixes: ['https://www.trike.com.ph', 'trike://'],
+  config: {
+    screens: {
+      Bookings: 'bookings',
+      // Profile: 'user',
+    },
+  }
+};
 
 const App = () => {
   
@@ -47,7 +61,7 @@ const App = () => {
     <Provider store={store}>
       <IconRegistry icons={EvaIconsPack} />
       <ApplicationProvider {...eva} theme={{...eva.light, ...theme}} customMapping={mapping}>
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer linking={linking} ref={navigationRef}>
           <Stack.Navigator screenOptions={{ headerShown: false }} mode="modal">
             <Stack.Screen
               name="Intro"
@@ -93,6 +107,10 @@ const App = () => {
               name="FoodPayment"
               component={FoodPayment}
               options={{selectedSeller: 'selectedSeller'}}
+            />
+            <Stack.Screen
+              name="DeliveryPayment"
+              component={DeliveryPayment}
             />
           </Stack.Navigator>
         </NavigationContainer>

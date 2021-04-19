@@ -364,7 +364,6 @@ export const changeQuantity = ({ orderItemID, sellerID, operation }) => async (d
   }
 }
 export const cancelOrder = ({ id }) => async (dispatch, getState) => {
-  $('.loader').fadeIn();
   try {
     const res = await axios.put(`${PROJECT_URL}/api/cancel_order/${id}/`, null, tokenConfig(getState))
     if (res.data.status) {
@@ -372,24 +371,27 @@ export const cancelOrder = ({ id }) => async (dispatch, getState) => {
         getMore: false,
       }))
       if (res.data.status === 'error') {
-        M.toast({
-          html: res.data.msg,
-          displayLength: 5000,
-          classes: 'red'
-        });
+        Alert.alert(
+          "Error",
+          res.data.msg,
+          [
+            { text: "OK" }
+          ]
+        );
       }
     } else {
       dispatch({
         type: CANCEL_ORDER,
         payload: res.data.id
       });
-      M.toast({
-        html: 'Order Canceled',
-        displayLength: 5000,
-        classes: 'orange'
-      });
+      Alert.alert(
+        "Order Canceled",
+        '',
+        [
+          { text: "OK" }
+        ]
+      );
     }
-    $('.loader').fadeOut();
   } catch (err) {
     await dispatch(getOrders({
       page: 1,
@@ -397,7 +399,6 @@ export const cancelOrder = ({ id }) => async (dispatch, getState) => {
       delivered: false,
       keywords: ''
     }))
-    $('.loader').fadeOut();
   }
 }
 
@@ -435,6 +436,17 @@ export const foodCheckout = ({ formData, orderSeller, navigation }) => async (di
       navigation.navigate('FoodPayment', { selectedSeller: orderSeller.name })
     } else {
       dispatch({ type: CHECKOUT_FAILED })
+      Alert.alert(
+        "Error",
+        res.data.msg,
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          { text: "OK" }
+        ]
+      );
       await dispatch(getCurrentOrder({
         type: 'food',
         query: `?order_seller=${orderSeller.id}`,
@@ -445,66 +457,47 @@ export const foodCheckout = ({ formData, orderSeller, navigation }) => async (di
     console.log('error', err)
   }
 }
-export const confirmDelivery = ({ formData, history }) => async (dispatch, getState) => {
-  dispatch({ type: CURRENT_ORDER_LOADING });
-
-  const origin = new google.maps.LatLng(formData.pickupLat, formData.pickupLng);
-  const destination =  new google.maps.LatLng(formData.deliveryLat, formData.deliveryLng);
+export const confirmDelivery = ({ formData, navigation }) => async (dispatch, getState) => {
+  // dispatch({ type: CURRENT_ORDER_LOADING });
 
   try {
-    const distanceService = new google.maps.DistanceMatrixService();
-    distanceService.getDistanceMatrix({
-      origins: [origin],
-      destinations: [destination],
-      travelMode: 'DRIVING',
-      // transitOptions: TransitOptions,
-      // drivingOptions: DrivingOptions,
-      // unitSystem: UnitSystem,
-      // avoidHighways: Boolean,
-      // avoidTolls: Boolean,
-    }, async (response, status) => {
-      if (status === 'OK') {
-        const distanceString = response.rows[0].elements[0].distance.text
-        const distanceValue = response.rows[0].elements[0].distance.value
-        const durationString = response.rows[0].elements[0].duration.text
-        const durationValue = response.rows[0].elements[0].duration.value
+    const orderBody = {
+      user: getState().auth.user.id,
+      rider_payment_needed: formData.riderPaymentNeeded,
+      two_way: formData.twoWay,
+      vehicle_chosen: formData.vehicleChoice,
 
-        const orderBody = {
-          user: getState().auth.user.id,
-          rider_payment_needed: formData.riderPaymentNeeded,
-          two_way: formData.twoWay,
-          vehicle_chosen: formData.vehicleChoice,
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      contact: formData.contact,
+      email: formData.email,
+      gender: formData.gender,
 
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          contact: formData.contact,
-          email: formData.email,
-          gender: formData.gender,
+      description: formData.description,
+      
+      unit: formData.unit ? formData.unit : null,
+      weight: formData.weight ? formData.weight : 0,
+      height: formData.height ? formData.height : 0,
+      width: formData.width ? formData.width : 0,
+      length: formData.length ? formData.length : 0,
+      
+      promo_code: formData.promoCode,
 
-          unit: formData.unit ? formData.unit : null,
-          weight: formData.weight ? formData.weight : 0,
-          height: formData.height ? formData.height : 0,
-          width: formData.width ? formData.width : 0,
-          length: formData.length ? formData.length : 0,
-          description: formData.description,
-
-          loc1_latitude: parseFloat(formData.pickupLat),
-          loc1_longitude: parseFloat(formData.pickupLng),
-          loc1_address: formData.pickupAddress,
-          loc2_latitude: parseFloat(formData.deliveryLat),
-          loc2_longitude: parseFloat(formData.deliveryLng),
-          loc2_address: formData.deliveryAddress,
-          distance_text: distanceString,
-          distance_value: distanceValue,
-          duration_text: durationString,
-          duration_value: durationValue,
-        }
-        const currentOrder = await axios.put(`${PROJECT_URL}/api/current_order/delivery/`, orderBody, tokenConfig(getState))
-        history.push('/delivery/payments')
-      }
-    });
+      loc1_latitude: parseFloat(formData.pickupLat),
+      loc1_longitude: parseFloat(formData.pickupLng),
+      loc1_address: formData.pickupAddress,
+      loc2_latitude: parseFloat(formData.deliveryLat),
+      loc2_longitude: parseFloat(formData.deliveryLng),
+      loc2_address: formData.deliveryAddress,
+      distance_text: formData.distanceText,
+      distance_value: formData.distanceValue,
+      duration_text: formData.durationText,
+      duration_value: formData.durationValue,
+    }
+    const res = await axios.put(`${PROJECT_URL}/api/current_order/delivery/`, orderBody, tokenConfig(getState))
+    navigation.navigate('DeliveryPayment')
   } catch (err) {
-    console.log('error', err.data)
+    console.log('error', err)
   }
 }
 export const confirmRideHail = ({ formData, history }) => async (dispatch, getState) => {
@@ -618,41 +611,58 @@ export const finalizeTransaction = ({ authID, currentOrder, history, type, query
     });
   }
 }
-export const proceedWithCOD = ({ history, type, query, socket }) => async (dispatch, getState) => {
-  dispatch({ type: COMPLETE_ORDER_LOADING });
+export const proceedWithCOD = ({ navigation, type, query, socket }) => async (dispatch, getState) => {
+  // dispatch({ type: COMPLETE_ORDER_LOADING });
   try {
     const res = await axios.put(`${PROJECT_URL}/api/complete_order/1/${type}/${query ? query : ''}`, null, tokenConfig(getState))
     if (res.data.status === 'success') {
       dispatch({ type: COMPLETE_ORDER_SUCCESS });
-      M.toast({
-        html: type === 'food' ? 'Food Ordered': 'Delivery Booked',
-        displayLength: 5000,
-        classes: 'green'
-      });
-      history.push('/bookings')
+      Alert.alert(
+        "Success",
+        "Order Booked!",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          { text: "OK" }
+        ]
+      );
+      navigation.navigate('Bookings')
     } else {
       dispatch({ type: COMPLETE_ORDER_FAILED });
-      M.toast({
-        html: res.data.msg,
-        displayLength: 5000,
-        classes: 'red'
-      });
+      Alert.alert(
+        "Error",
+        "'You already reviewed that'",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          { text: "OK" }
+        ]
+      );
       if (type === 'food') {
-        history.push(`${PROJECT_URL}/food/restaurant?b=${res.data.seller_name_to_url}&course=Meals`)
+        navigation.navigate('RestaurantDetail', { selectedSeller: res.data.seller_name_to_url })
       } else {
-        history.push('/bookings')
+        navigation.navigate('Bookings')
       }
     }
-    $('.loader').fadeOut();
-    axios.post('${PROJECT_URL}/api/new_order_update/', { 'ref_code': res.data.ref_code }, tokenConfig(getState))
+    // axios.post(`${PROJECT_URL}/api/new_order_update/`, { 'ref_code': res.data.ref_code }, tokenConfig(getState))
   } catch (error) {
     console.log(error)
     dispatch({ type: COMPLETE_ORDER_FAILED });
-    M.toast({
-      html: 'Something went wrong. Please try again',
-      displayLength: 5000,
-      classes: 'red'
-    });
+    Alert.alert(
+      "Error",
+      "Something went wrong. Please try again",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { text: "OK" }
+      ]
+    );
   }
 }
 

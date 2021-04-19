@@ -128,7 +128,7 @@ const OrderReview = ({
                           onChangeText={nextValue => setComment(nextValue)}
                           style={{ marginTop: 10, backgroundColor: 'white' }}
                         />
-                        <Text style={[styles.small, {alignSelf: 'flex-end'}]}>{comment.length}/1200</Text>
+                        <Text style={[styles.small, {alignSelf: 'flex-end'}]}>{comment.length}/4000</Text>
                         <Button
                           style={[{marginVertical: 15}]}
                           onPress={submitOrderReview}

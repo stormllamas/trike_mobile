@@ -156,6 +156,24 @@ const FoodCart = ({
       setDurationValue('');
       setDelivery('')
     }
+    return () => {
+      if(deliveryAddressIndex.row > 0) {
+        user.addresses.forEach((address, index) => {
+        if (index == deliveryAddressIndex.row-1) {
+          setDeliveryAddressId(address.id)
+        }})
+      } else {
+        setDeliveryAddressId('')
+        setDeliveryLat('')
+        setDeliveryLng('')
+        setDeliveryAddress('')
+        setDistanceText('');
+        setDistanceValue('');
+        setDurationText('');
+        setDurationValue('');
+        setDelivery('')
+      }
+    }
   }, [deliveryAddressIndex])
   useEffect(() => {
     if (deliveryAddressId) {

@@ -89,6 +89,15 @@ const Food = ({
       })
       setAutoCompleteData(data)
     }
+    return () => {
+      if (!allSellersLoading) {
+        const data = []
+        allSellers.forEach(seller => {
+          data.push({title: seller.name})
+        })
+        setAutoCompleteData(data)
+      }
+    }
   }, [allSellersLoading]);
   
   useEffect(() => {

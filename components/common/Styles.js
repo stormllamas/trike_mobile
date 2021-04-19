@@ -104,7 +104,7 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
-    elevation: 5
+    elevation: 2
   },
   boxHeader: {
     paddingVertical: 15,
@@ -182,7 +182,7 @@ export const styles = StyleSheet.create({
     borderColor: '#53A557',
     borderRadius: 100,
 
-    shadowColor: '#000',
+    shadowColor: '#AFB1B1',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
@@ -207,7 +207,6 @@ export const styles = StyleSheet.create({
     width: 100,
     borderRadius: 100,
   },
-
   // Product Quantity
   productQuantity: {
     flexDirection: 'row',
