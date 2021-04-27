@@ -2,7 +2,7 @@
 import { PROJECT_URL } from "@env"
 import axios from 'axios';
 import { Alert } from 'react-native'
-
+console.log(PROJECT_URL)
 import {
   CATEGORIES_LOADING, GET_CATEGORIES,
   CATEGORIES_ERROR,

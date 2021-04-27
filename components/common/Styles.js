@@ -10,8 +10,18 @@ export const styles = StyleSheet.create({
     bottom: 10,
     left: deviceWidth*.1
   },
+  authCard: {
+    marginTop: 15,
+    marginHorizontal: 20,
+    justifyContent: 'center',
+    padding: 25,
+    paddingHorizontal: 10
+  },
   inputGroup: {
     marginBottom: 15,
+  },
+  link : {
+    color: '#1C8DFF'
   },
   superModal: {
     position: 'absolute',

@@ -12,11 +12,13 @@ import { reroute } from '../../actions/auth'
 
 const Intro = ({
   auth: {userLoading, isAuthenticated},
+  route,
   reroute,
   navigation
 }) => {
 
   useEffect(() => {
+    // console.log(route.params)
     reroute({
       navigation,
       type: 'intro',

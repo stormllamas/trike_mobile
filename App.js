@@ -20,6 +20,8 @@ import {navigationRef} from './components/RootNavigation'
 
 import Intro from './components/common/Intro'
 import Login from './components/accounts/Login'
+import Signup from './components/accounts/Signup'
+import ConfirmEmail from './components/accounts/ConfirmEmail'
 import Profile from './components/accounts/Profile'
 import Bookings from './components/accounts/Bookings'
 import OrderReview from './components/accounts/review/OrderReview'
@@ -44,8 +46,9 @@ const linking = {
   prefixes: ['https://www.trike.com.ph', 'trike://'],
   config: {
     screens: {
+      Intro: 'activated/:uidb64',
+      Login: 'login',
       Bookings: 'bookings',
-      // Profile: 'user',
     },
   }
 };
@@ -70,6 +73,14 @@ const App = () => {
             <Stack.Screen
               name="Login"
               component={Login}
+            />
+            <Stack.Screen
+              name="Signup"
+              component={Signup}
+            />
+            <Stack.Screen
+              name="ConfirmEmail"
+              component={ConfirmEmail}
             />
             <Stack.Screen
               name="Profile"

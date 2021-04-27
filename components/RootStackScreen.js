@@ -14,6 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { setMenuToggler } from '../actions/siteConfig';
 import { useBackButton } from './common/BackButtonHandler';
+import { reroute, logout } from '../actions/auth';
 
 import Food from './food/Food'
 import Delivery from './delivery/Delivery'
@@ -22,8 +23,11 @@ import BottomTabs from './layout/BottomTabs'
 const RootStack = createStackNavigator();
 
 const Root = ({
+  auth: {userLoading, isAuthenticated},
   siteConfig: {sideBarToggled},
   setMenuToggler,
+  logout,
+  reroute,
   navigation
 }) => {
   
@@ -45,6 +49,15 @@ const Root = ({
     }
   }
   useBackButton(handleBackButtonClick)
+
+  useEffect(() => {
+    reroute({
+      navigation,
+      type: 'private',
+      userLoading,
+      isAuthenticated
+    })
+  }, [userLoading]);
 
   useEffect(() => {
     if (menuActive) {
@@ -144,8 +157,8 @@ const Root = ({
             <MenuItem title='My Bookings' accessoryLeft={() => <Ionicons size={22} name='cube-outline'/>} onPress={() => navigation.navigate('Bookings')}/>
             <MenuGroup title='Account'>
               <MenuItem title='My Profile' accessoryLeft={() => <Ionicons size={22} name='person-circle-outline'/>} onPress={() => navigation.navigate('Profile')}/>
-              <MenuItem title='Security' accessoryLeft={() => <Ionicons size={22} name='shield-outline'/>}/>
-              <MenuItem title='Logout' accessoryLeft={() => <Ionicons size={22} name='log-out-outline'/>}/>
+              {/* <MenuItem title='Security' accessoryLeft={() => <Ionicons size={22} name='shield-outline'/>}/> */}
+              <MenuItem title='Logout' accessoryLeft={() => <Ionicons size={22} name='log-out-outline'/>} onPress={() => {logout()}}/>
             </MenuGroup>
           </Menu>
         </>
@@ -160,11 +173,14 @@ const Root = ({
 }
 
 Root.protoTypes = {
+  reroute: PropTypes.func.isRequired,
   setMenuToggler: PropTypes.func.isRequired,
+  logout: PropTypes.func.isRequired,
 }
 
 const mapStateToProps = state => ({
+  auth: state.auth,
   siteConfig: state.siteConfig
 });
 
-export default connect(mapStateToProps, { setMenuToggler })(Root);
+export default connect(mapStateToProps, { reroute, setMenuToggler, logout })(Root);

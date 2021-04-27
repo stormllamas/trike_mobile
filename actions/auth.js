@@ -82,11 +82,6 @@ export const login = ({email, password}) => async dispatch => {
         { cancelable: false }
       ]
     )
-    M.toast({
-      html: 'Oops something went wrong, Try again later',
-      displayLength: 3500,
-      classes: 'red',
-    });
     dispatch({ type: LOGIN_FAIL });
   }
 }
@@ -102,7 +97,7 @@ export const logout = () => async (dispatch, getState) => {
   }
 }
 
-export const signup = ({first_name, last_name, username, email, password}, history) => async dispatch => {
+export const signup = ({first_name, last_name, username, email, password}) => async dispatch => {
   // dispatch({ type: USER_LOADING })
   const body = {
     first_name,
@@ -116,60 +111,39 @@ export const signup = ({first_name, last_name, username, email, password}, histo
     const res = await axios.post(`${PROJECT_URL}/api/auth/signup`, body)
     if (res.data.status === "okay") {
       dispatch({ type: SIGNUP_SUCCESS })
-      history.push(`/confirm_email/${email}`)
-      M.toast({
-        html: 'Please activate your account',
-        displayLength: 3500,
-        classes: 'green'
-      });
+      return {
+        'status': 'okay',
+        'msg': 'Please activate your account'
+      }
     } else {
-      M.toast({
-        html: res.data.msg,
-        displayLength: 3500,
-        classes: 'red'
-      });
+      return {
+        'status': 'error',
+        'msg': res.data.msg
+      }
     }
   } catch (err) {
     dispatch({ type: SIGNUP_FAIL });
-    M.toast({
-      html: 'Something went wrong. Please try again',
-      displayLength: 3500,
-      classes: 'red'
-    });
+    return {
+      'status': 'Something went wrong. Please try again',
+      'msg': res.data.msg
+    }
   }
 }
-export const resendActivation = ({ email }, history) => async dispatch => {
+export const resendActivation = ({ email }) => async dispatch => {
   const body = {
     email
   }
   try {
     const res = await axios.post(`${PROJECT_URL}/api/auth/resend_activation`, body)
-    if (res.data.status === "okay") {
-      // dispatch({ type: SIGNUP_SUCCESS })
-      M.toast({
-        html: res.data.msg,
-        displayLength: 3500,
-        classes: 'green'
-      });
-    } else {
-      M.toast({
-        html: res.data.msg,
-        displayLength: 3500,
-        classes: 'red'
-      });
-      if (res.data.msg === 'Email already activated') {
-        history.push(`/login`)
-      } else if (res.data.msg === 'Email does not exist. Please signup first') {
-        history.push(`/signup`)
-      }
+    return {
+      'status': res.data.status,
+      'msg': res.data.msg
     }
   } catch (err) {
-    // dispatch({ type: SIGNUP_FAIL });
-    M.toast({
-      html: 'Something went wrong. Please try again',
-      displayLength: 3500,
-      classes: 'red'
-    });
+    return {
+      'status': 'error',
+      'msg': 'Something went wrong. Please try again'
+    }
   }
 }
 

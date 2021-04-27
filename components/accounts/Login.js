@@ -4,15 +4,11 @@ import { PROJECT_URL } from "@env"
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types'
 
-import { Icon, Layout, Text, Button, Card, Input } from '@ui-kitten/components';
+import { Icon, Spinner, Layout, Text, Button, Card, Input } from '@ui-kitten/components';
 import { LogBox, Dimensions, StyleSheet, Image, ScrollView, SafeAreaView, View, FlatList, TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
 
 import { login, socialSignin, reroute } from '../../actions/auth';
-
-
-const AlertIcon = (props) => (
-  <Icon {...props} name='alert-circle-outline'/>
-);
+import { styles } from '../common/Styles'
 
 const Login = ({
   auth: {userLoading, isAuthenticated},
@@ -27,6 +23,8 @@ const Login = ({
   
   const [secureTextEntry, setSecureTextEntry] = useState(true);
 
+  const [loggingIn, setLoggingIn] = useState(false);
+
   const toggleSecureEntry = () => {
     setSecureTextEntry(!secureTextEntry);
   };
@@ -39,38 +37,43 @@ const Login = ({
   
   const onSubmit = async e => {
     if(email && password) {
-      login({
+      setLoggingIn(true)
+      await login({
         email,
         password,
       })
+      setLoggingIn(false)
     }
   }
 
   useEffect(() => {
     reroute({
       navigation,
-      type: 'intro',
+      type: 'auth',
       userLoading,
       isAuthenticated
     })
   }, [userLoading]);
 
   return (
-    <>
-      <Layout level="2">
+    <Layout level="2" style={{ minHeight: Dimensions.get('window').height, paddingBottom: 50 }}>
+      {userLoading || loggingIn && (
+        <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
+          <Spinner size='large'/>
+        </View>
+      )}
+      <ScrollView>
         <Image
-          style={styles.tinyLogo}
+          style={[styles.tinyLogo, { marginTop: 50 }]}
           source={{uri:`${PROJECT_URL}/static/frontend/img/Trike_logo-whole.png`}}
         />
-        <Card style={styles.authCard}>
+        <Card style={styles.authCard} disabled={true}>
           <Text style={{ fontSize: 24, fontWeight: '700', marginBottom: 25, alignSelf: 'center' }}>Login</Text>
           <View style={[styles.inputGroup]}>
             <Input
               value={email}
               label='Email'
               placeholder='Enter Your Email'
-              // caption='Should contain at least 8 symbols'
-              // captionIcon={AlertIcon}
               onChangeText={nextValue => setEmail(nextValue)}
             />
           </View>
@@ -79,40 +82,26 @@ const Login = ({
               value={password}
               label='Password'
               placeholder='Enter Your Password'
-              // caption='Should contain at least 8 symbols'
               accessoryRight={renderIcon}
-              // captionIcon={AlertIcon}
               secureTextEntry={secureTextEntry}
               onChangeText={nextValue => setPassword(nextValue)}
             />
           </View>
-          <Button style={{backgroundColor: '#2196F3', borderColor: '#2196F3'}} onPress={onSubmit}>Login</Button>
+          <Button style={{backgroundColor: '#2196F3', borderColor: '#2196F3', marginTop: 20 }} onPress={onSubmit}>Login</Button>
         </Card>
-      </Layout>
-    </>
+        <View style={[ { marginTop: 50, marginBottom: 50, alignItems: 'center' } ]}>
+          <Text style={[ styles.mute, { marginBottom: 15 } ]}>Don't have an account? <Text style={[ styles.link ]} onPress={() => navigation.navigate('Signup')}>Signup</Text></Text>
+          <Text style={[ styles.link ]}>Forgot your Password?</Text>
+        </View>
+      </ScrollView>
+    </Layout>
   )
 }
 
 
 let deviceWidth = Dimensions.get('window').width
 
-const styles = StyleSheet.create({
-  authCard: {
-    marginTop: 50,
-    marginHorizontal: 20,
-    justifyContent: 'center',
-    padding: 25,
-    paddingHorizontal: 10
-  },
-  inputGroup: {
-    marginBottom: 15,
-  },
-  tinyLogo: {
-    height: 50,
-    width: 155,
-    alignSelf: 'center',
-    marginTop: 50,
-  }
+const loginStyles = StyleSheet.create({
 })
 
 Login.propTypes = {
