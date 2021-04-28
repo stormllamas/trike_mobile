@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import { PROJECT_URL } from "@env"
+console.log('ProductDetail ENV', PROJECT_URL)
 import { useBackButton } from '../common/BackButtonHandler';
 
 import FoodCart from './FoodCart'

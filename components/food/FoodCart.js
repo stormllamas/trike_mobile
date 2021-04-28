@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import axios from 'axios';
 import { GOOGLE_API_KEY, PROJECT_URL } from "@env"
+console.log('FoodCart ENV', GOOGLE_API_KEY, PROJECT_URL)
 
 import { Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation, Spinner } from '@ui-kitten/components';
 import { Animated, Easing, Dimensions, View, TouchableHighlight, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native'
@@ -286,7 +287,7 @@ const FoodCart = ({
                   <Collapsible collapsed={addressDetailsActivated} duration={150} align="center">
                     <View style={styles.collapsibleContent}>
                       <Select
-                        value={deliveryAddressIndex.row > 0 ? user.addresses[deliveryAddressIndex.row-1].name : '-Select an Address-'}
+                        value={deliveryAddressIndex.row > 0 ? (user.addresses[deliveryAddressIndex.row-1].name ? user.addresses[deliveryAddressIndex.row-1].name : 'Unnamed Address') : '-Select an Address-'}
                         selectedIndex={deliveryAddressIndex}
                         style={{ backgroundColor: 'white'}}
                         onSelect={index => setDeliveryAddressIndex(index)}>
@@ -300,12 +301,13 @@ const FoodCart = ({
                           <Text style={[{ fontFamily: 'Lato-Bold', marginTop: 5 }]}>₱ {delivery.toFixed(2)} <Text style={[styles.mute, styles.small, { marginTop: 5 }]}>Delivery</Text></Text>
                           <Text style={[styles.mute, styles.small, { marginTop: 5 }]}>{deliveryAddressIndex.row > 0 ? user.addresses[deliveryAddressIndex.row-1].address : 'No address selected'}</Text>
                         </View>
-                      ): (
+                      ) : (
                         <View style={[{ marginLeft: 5 }]}>
                           <Text style={[styles.mute, { fontFamily: 'Lato-Bold', marginTop: 5 }]}>-</Text>
                           <Text style={[styles.mute, styles.small, { marginTop: 5 }]}>{deliveryAddressIndex.row > 0 ? user.addresses[deliveryAddressIndex.row-1].address : 'No address selected'}</Text>
                         </View>
                       )}
+                      <Text style={[{ marginLeft: 5, marginTop: 10, color: '#59CD5F' }]} onPress={() => navigation.navigate('Profile')}><Ionicons name="add-outline" size={18}/>Add an address to your profile</Text>
                       <Input
                         value={description}
                         label='Order Notes'

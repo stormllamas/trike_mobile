@@ -1,5 +1,6 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { PROJECT_URL } from "@env"
+console.log('Login ENV', PROJECT_URL)
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types'

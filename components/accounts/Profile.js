@@ -13,6 +13,7 @@ import Geolocation from 'react-native-geolocation-service'
 navigator.geolocation = require('react-native-geolocation-service');
 
 import { GOOGLE_API_KEY } from "@env"
+console.log('Profile ENV', GOOGLE_API_KEY)
 
 import { v4 as uuid } from 'uuid'
 

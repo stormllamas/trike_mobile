@@ -1,6 +1,7 @@
 import React, { useRef, useCallback } from 'react';
 import { Icon, Text, Card } from '@ui-kitten/components';
 import { PROJECT_URL } from "@env"
+console.log('RestaurantProduct', PROJECT_URL)
 import { Dimensions, View, StyleSheet, Image } from 'react-native'
 
 import PropTypes from 'prop-types'

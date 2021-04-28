@@ -16,6 +16,8 @@ import {
 import { Alert } from "react-native";
 import { PROJECT_URL } from "@env"
 import axios from 'axios';
+console.log('auth url', PROJECT_URL)
+
 
 export const reroute = ({type, navigation, userLoading, isAuthenticated}) => async dispatch => {
   if (!userLoading) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { connect } from 'react-redux';
 import { PROJECT_URL } from "@env"
+console.log('FoodPayment ENV', PROJECT_URL)
 import { useBackButton } from '../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 

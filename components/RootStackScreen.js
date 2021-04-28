@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { PROJECT_URL } from "@env"
+console.log('RootStackScreen', PROJECT_URL)
 import PropTypes from 'prop-types'
 
 import { createStackNavigator } from '@react-navigation/stack';

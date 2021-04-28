@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { connect } from 'react-redux';
-import { PROJECT_URL } from "@env"
 import { useBackButton } from '../../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { connect } from 'react-redux';
-import { PROJECT_URL } from "@env"
+import { PROJECT_URL, DEBUG } from "@env"
+console.log('Bookings ENV', PROJECT_URL, DEBUG)
 import { useBackButton } from '../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 
@@ -102,35 +103,38 @@ const Bookings = ({
     }
   }, [modalAnim, orderModalActive])
 
-  // useEffect(() => {
-  //   let wsStart = 'wss://'
-  //   let port = ':8001'
-  //   // if (window.location.protocol === 'https:') {
-  //   //   wsStart = 'wss://'
-  //   //   port = ':8001'
-  //   // }
-  //   let endpoint = wsStart + 'trike.com.ph' + port
-  //   setSocket(new WebSocket(endpoint+'/order_update/'))
-  // }, []);
+  useEffect(() => {
+    let wsStart = 'ws://'
+    let port = ''
+    console.log(DEBUG, typeof(DEBUG))
+    console.log(PROJECT_URL)
+    if (DEBUG === 'False') {
+      wsStart = 'wss://'
+      port = ':8001'
+    }
+    let endpoint = wsStart + `${PROJECT_URL.replace('http://', '')}` + port
+    console.log(endpoint)
+    setSocket(new WebSocket(endpoint+'/order_update/'))
+  }, []);
 
-  // useEffect(() => {
-  //   if (socket) {
-  //     socket.onmessage = function(e){
-  //       console.log('message', e)
-  //       // const data = JSON.parse(e.data)
-  //       // syncOrder({ data })
-  //     }
-  //     socket.onopen = function(e){
-  //       console.log('open', e)
-  //     }
-  //     socket.onerror = function(e){
-  //       console.log('error', e)
-  //     }
-  //     socket.onclose = function(e){
-  //       console.log('close', e)
-  //     }
-  //   }
-  // }, [socket]);
+  useEffect(() => {
+    if (socket) {
+      socket.onmessage = function(e){
+        console.log('message', e)
+        const data = JSON.parse(e.data)
+        syncOrder({ data })
+      }
+      socket.onopen = function(e){
+        console.log('open', e)
+      }
+      socket.onerror = function(e){
+        console.log('error', e)
+      }
+      socket.onclose = function(e){
+        console.log('close', e)
+      }
+    }
+  }, [socket]);
 
 
   return (

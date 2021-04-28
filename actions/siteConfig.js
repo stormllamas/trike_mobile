@@ -1,6 +1,7 @@
 import { SITE_LOADING, SITE_LOADED, SET_SIDEBAR_TOGGLER } from './types'
 import { PROJECT_URL } from "@env"
 import axios from 'axios';
+console.log('site config url', PROJECT_URL)
 
 export const loadSite = () => async dispatch => {
   dispatch({ type: SITE_LOADING });

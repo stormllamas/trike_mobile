@@ -3,6 +3,7 @@ import React from 'react';
 import axios from 'axios';
 
 import { GOOGLE_API_KEY } from "@env"
+console.log('google GOOGLE_API_KEY', GOOGLE_API_KEY)
 
 // Gets a latLng or placeId param
 // Requests information of param coordinates

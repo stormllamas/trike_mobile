@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { GOOGLE_API_KEY, PROJECT_URL } from "@env"
+import { GOOGLE_API_KEY } from "@env"
+console.log('Delivery url', GOOGLE_API_KEY)
 import { styles } from '../common/Styles'
 
 import { Layout, Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation, Spinner, Divider } from '@ui-kitten/components';

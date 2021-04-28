@@ -1,6 +1,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { PROJECT_URL } from "@env"
+console.log('Intro ENV', PROJECT_URL)
 import PropTypes from 'prop-types'
 
 import { styles } from '../common/Styles'
@@ -18,10 +19,9 @@ const Intro = ({
 }) => {
 
   useEffect(() => {
-    // console.log(route.params)
     reroute({
-      navigation,
       type: 'intro',
+      navigation,
       userLoading,
       isAuthenticated
     })
