@@ -2,11 +2,12 @@ import React, { Fragment, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { GOOGLE_API_KEY, PROJECT_URL } from "@env"
+
+import { GOOGLE_API_KEY, PROJECT_URL } from "../../actions/siteConfig"
 console.log('FoodCart ENV', GOOGLE_API_KEY, PROJECT_URL)
 
-import { Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation, Spinner } from '@ui-kitten/components';
-import { Animated, Easing, Dimensions, View, TouchableHighlight, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native'
+import { Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation, Spinner, Divider } from '@ui-kitten/components';
+import { Animated, Easing, Alert, Dimensions, View, TouchableHighlight, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native'
 
 import Collapsible from 'react-native-collapsible';
 
@@ -76,6 +77,11 @@ const FoodCart = ({
   const [deliveryAddressId, setDeliveryAddressId] = useState('');
   const [deliveryAddressIndex, setDeliveryAddressIndex] = useState(new IndexPath(0));
 
+  const [loading, setLoading] = useState(false)
+
+  const [promoCode, setPromoCode] = useState('');
+  const [promoCodeSet, setPromoCodeSet] = useState(false);
+  const [promoCodeRetrieved, setPromoCodeRetrieved] = useState('');
 
   const [modalAnim, setModalAnim] = useState(new Animated.Value(Dimensions.get('window').height))
   useEffect(() => {
@@ -103,6 +109,7 @@ const FoodCart = ({
   }, [modalAnim, foodCartActive])
 
   const proceedToPayments = async () => {
+    setLoading(true)
     if(currentOrder.count < 1 && deliveryAddressId === '' && !delivery && !lastName && !firstName && !contact && !email ? false : true) {
       const formData = {
         vehicleChoice: siteInfo.vehicles.filter(vehicle => vehicle.name === 'motorcycle')[0].id,
@@ -111,7 +118,8 @@ const FoodCart = ({
         pickupLat, pickupLng, pickupAddress,
         deliveryLat, deliveryLng, deliveryAddress,
         distanceText, distanceValue, durationText, durationValue,
-        description
+        description,
+        promoCode: promoCodeSet && promoCodeRetrieved ? promoCodeRetrieved.id : false
       }
       await foodCheckout({
         formData,
@@ -119,13 +127,17 @@ const FoodCart = ({
         orderSeller: seller
       })
     }
+    setLoading(false)
   }
   
   const addressSelected = async () => {
+    setLoading(true)
     const addressInfo = await getAddress(deliveryAddressId)
+    console.log('addressInfo', addressInfo)
     const origin = `${pickupLat},${pickupLng}`;
     const destination = `${addressInfo.latitude},${addressInfo.longitude}`;
     const res = await getDistance({ origin, destination })
+    console.log(res.data)
 
     setDeliveryLat(addressInfo.latitude)
     setDeliveryLng(addressInfo.longitude)
@@ -138,6 +150,68 @@ const FoodCart = ({
     let perKmTotal = Math.round((parseInt(res.data.distanceValue)/1000)*siteInfo.vehicles.filter(vehicle => vehicle.name === 'motorcycle')[0].per_km_price)
     let total = siteInfo.shipping_base+perKmTotal
     setDelivery(Math.round(total))
+    setLoading(false)
+  }
+
+  const promoCodeButtonClicked = () => {
+    if (promoCodeSet) {
+      setPromoCode('')
+      setPromoCodeSet(false)
+      setPromoCodeRetrieved('')
+    } else {
+      // Check if Promo code exists
+      if(siteInfo.promo_code_list.map(promo_code => promo_code.code.toLowerCase()).includes(promoCode.toLowerCase())) {
+        let promoCodeUsed = siteInfo.promo_code_list.filter(promo_code => promo_code.code.toLowerCase() === promoCode.toLowerCase())[0]
+        // Check if active
+        if (promoCodeUsed.promo_code_active) {
+          if (promoCodeUsed.reusable) {
+            setPromoCodeSet(promoCodeUsed.id)
+            Alert.alert(
+              "Success",
+              "Promo Code Set!",
+              [
+                { text: "OK" }
+              ]
+            );
+          } else {
+            if (!user.promo_codes_used.includes(promoCodeUsed.code)) {
+              setPromoCodeSet(promoCodeUsed.id)
+              Alert.alert(
+                "Success",
+                "Promo Code Set!",
+                [
+                  { text: "OK" }
+                ]
+              );
+            } else {
+              Alert.alert(
+                "Error",
+                "Code already used",
+                [
+                  { text: "OK" }
+                ]
+              );
+            }
+          }
+        } else {
+          Alert.alert(
+            "Error",
+            "Invalid Promo Code",
+            [
+              { text: "OK" }
+            ]
+          );
+        }
+      } else {
+        Alert.alert(
+          "Error",
+          "Invalid Promo Code",
+          [
+            { text: "OK" }
+          ]
+        );
+      }
+    }
   }
 
   useEffect(() => {
@@ -215,6 +289,19 @@ const FoodCart = ({
       }
     }
   }, [currentOrderLoading]);
+
+  // Promocode UseEffects
+  useEffect(() => {
+    if (promoCodeSet) {
+      let promoCodeUsed = siteInfo.promo_code_list.filter(promo_code => promo_code.code.toLowerCase() === promoCode.toLowerCase())[0]
+      setPromoCodeRetrieved(promoCodeUsed)
+      // setDelivery(Math.round(delivery*(1-promoCodeUsed.delivery_discount)))
+    } else {
+      // let perKmTotal = Math.round((parseInt(distanceValue)/1000)*siteInfo.vehicles.filter(vehicle => vehicle.name === 'motorcycle')[0].per_km_price)
+      // let total = siteInfo.shipping_base+perKmTotal
+      // setDelivery(Math.round(total))
+    }
+  }, [promoCodeSet]);
   
   return (
     isAuthenticated && !user.groups.includes('rider') && (
@@ -354,6 +441,49 @@ const FoodCart = ({
                     ))
                   )}
                 </View>
+
+                <View style={[styles.collapsibleWrapper]}>
+                  <View style={[styles.collapsibleContent, {borderWidth: 0, flexDirection: 'row'}]}>
+                    <Input
+                      value={promoCode}
+                      // label='Enter Promo Code'
+                      disabled={promoCodeSet || !delivery}
+                      placeholder='Enter a promo code'
+                      onChangeText={nextValue => setPromoCode(nextValue.toUpperCase())}
+                      keyboardType={Platform.OS === 'ios' ? 'default' : 'visible-password'}
+                      style={{ backgroundColor: 'white', flex: 1, marginRight: 10, marginTop: 5 }}
+                    />
+                    <Button
+                      // style={[{ backgroundColor: promoCodeSet ? '#DB555F' : (!delivery ? '#959595' : '#59CD5F')}, {color: '#FFFFFF'} ]}
+                      disabled={!delivery}
+                      onPress={promoCodeButtonClicked}
+                      status={promoCodeSet ? 'danger' : 'success'}
+                    >
+                      {promoCodeSet ? 'REMOVE' : 'APPLY'}
+                    </Button>
+                  </View>
+                  <Divider/>
+                  <View style={[styles.collapsibleContent, {marginBottom: 100, borderWidth: 0}]}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
+                      <Text style={[styles.mute, { fontSize: 14 }]}>Subtotal</Text>
+                      <Text>{currentOrder.subtotal ? `₱${parseFloat(currentOrder.subtotal).toFixed(2)}` : '₱0.00' }</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
+                      <Text style={[styles.mute, { fontSize: 14 }]}>Delivery</Text>
+                      <Text>{delivery ? `₱${delivery.toFixed(2)}` : '₱0.00' }</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
+                      <Text style={[styles.mute, { fontSize: 14 }]}>Promo discount</Text>
+                      <Text>{promoCodeSet && promoCodeRetrieved ? `-₱${Math.round((promoCodeRetrieved.delivery_discount*delivery)).toFixed(2)}` : '-0.00' }</Text>
+                    </View>
+                    <Divider/>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 15 }}>
+                      <Text style={[styles.mute]}>Total</Text>
+                      {/* <Text>{delivery ? `-₱${delivery.toFixed(2)}` : '-0.00' }</Text> */}
+                      <Text style={{ fontFamily: 'Lato-Black', fontSize: 20 }}>{delivery ? (promoCodeSet && promoCodeRetrieved ? `₱${(parseFloat(currentOrder.subtotal)+Math.round((delivery*(1-promoCodeRetrieved.delivery_discount))-.1)).toFixed(2)}` : `₱${(parseFloat(currentOrder.subtotal)+delivery).toFixed(2)}`) : '₱0.00' }</Text>
+                    </View>
+                  </View>
+                </View>
               </ScrollView>
               <Button
                 // style={[foodCardStyles.checkoutButton]}
@@ -363,8 +493,8 @@ const FoodCart = ({
               >
                 CHECKOUT
               </Button>
-              <Text style={[foodCardStyles.checkoutFloatText, {fontFamily: 'Lato-Bold'}]}>{currentOrder.count < 1 || deliveryAddressId === '' || !delivery || !lastName || !firstName || !contact || !email ? '' : `₱${(parseFloat(currentOrder.subtotal)+parseFloat(delivery)).toFixed(2)}` }</Text>
-              {quantityLoading || currentOrderLoading || deleteLoading || siteInfoLoading || userLoading ? (
+              <Text style={[foodCardStyles.checkoutFloatText, {fontFamily: 'Lato-Bold'}]}>{currentOrder.count < 1 || deliveryAddressId === '' || !delivery || !lastName || !firstName || !contact || !email ? '' : `₱${promoCodeSet && promoCodeRetrieved ? (parseFloat(currentOrder.subtotal)+Math.round((delivery*(1-promoCodeRetrieved.delivery_discount))-.1)).toFixed(2) : (parseFloat(currentOrder.subtotal)+delivery).toFixed(2)}` }</Text>
+              {quantityLoading || currentOrderLoading || deleteLoading || siteInfoLoading || userLoading || loading ? (
                 <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
                   <Spinner size='large'/>
                 </View>

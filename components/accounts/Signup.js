@@ -1,11 +1,12 @@
 import React, { useEffect, useState, Fragment } from 'react';
-import { PROJECT_URL } from "@env"
+
+import { PROJECT_URL } from "../../actions/siteConfig"
 console.log('Singup ENV', PROJECT_URL)
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types'
 
-import { Icon, Layout, Text, Button, Card, Input } from '@ui-kitten/components';
+import { Icon, Layout, Text, Button, Card, Input, Spinner } from '@ui-kitten/components';
 import { Alert, Dimensions, StyleSheet, Image, ScrollView, SafeAreaView, View, FlatList, TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
 
 import { signup, socialSignin, reroute } from '../../actions/auth';
@@ -33,7 +34,10 @@ const Signup = ({
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
   const onSubmit = async () => {
+    setLoading(true)
     if (firstName && lastName && email && password1 && password2 ? true : false) {
       if (password1 === password2) {
         const newUser = {
@@ -72,6 +76,7 @@ const Signup = ({
         ]
       );
     }
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -85,6 +90,11 @@ const Signup = ({
 
   return (
     <Layout level="2" style={{ minHeight: Dimensions.get('window').height, paddingBottom: 50 }}>
+      {loading && (
+        <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
+          <Spinner size='large'/>
+        </View>
+      )}
       <ScrollView>
         <Image
           style={[styles.tinyLogo, { marginTop: 50 }]}

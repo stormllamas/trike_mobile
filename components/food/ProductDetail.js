@@ -1,15 +1,16 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
-import { PROJECT_URL } from "@env"
-console.log('ProductDetail ENV', PROJECT_URL)
 import { useBackButton } from '../common/BackButtonHandler';
+
+import { PROJECT_URL } from "../../actions/siteConfig"
+console.log('ProductDetail ENV', PROJECT_URL)
 
 import FoodCart from './FoodCart'
 import RestaurantProduct from './RestaurantProduct'
 
 import { Layout, Icon, Text, Button, Radio, RadioGroup, Spinner } from '@ui-kitten/components';
-import { Dimensions, View, Image, StyleSheet, ScrollView, ImageBackground } from 'react-native'
+import { Animated, Easing, Alert, Dimensions, View, Image, StyleSheet, ScrollView, ImageBackground } from 'react-native'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -58,6 +59,53 @@ const ProductDetail = ({
   const [selectedVariant, setSelectedVariant] = useState('')
   const [selectedVariantIndex, setSelectedVariantIndex] = useState('')
 
+  const [topAlertActive, setTopAlertActive] = useState(false)
+  const [topAlertAnim, setTopAlertAnim] = useState(new Animated.Value(-20))
+  const [topAlertText, setTopAlertText] = useState('')
+  const [topAlertTimeout, setTopAlertTimeout] = useState(0)
+
+  // useEffect(() => {
+  //   clearTimeout(topAlertTimeout);
+  // }, [topAlertTimeout])
+
+  const clickAddToCard = () => {
+    clearTimeout(topAlertTimeout);
+    setTopAlertAnim(new Animated.Value(-20))
+    setTopAlertTimeout(
+      setTimeout(function () {
+        setTopAlertActive(false)
+      }, 4000)
+    );
+  }
+
+  useEffect(() => {
+    if (topAlertActive) {
+      Animated.timing(
+        topAlertAnim,
+        {
+          toValue: 46,
+          duration: 400,
+          easing: Easing.elastic(),
+          useNativeDriver: false,
+        }
+      ).start();
+    } else {
+      Animated.timing(
+        topAlertAnim,
+        {
+          toValue: -20,
+          duration: 400,
+          easing: Easing.back(),
+          useNativeDriver: false,
+        }
+      ).start();
+    }
+    return () => {
+      clearTimeout(topAlertTimeout)
+    }
+  }, [topAlertActive, topAlertAnim])
+
+
   const carouselRef = useRef()
 
   const handleBackButtonClick = () => {
@@ -77,6 +125,9 @@ const ProductDetail = ({
         productId: selectedVariant,
         sellerID: product.seller.id
       })
+      setTopAlertText(`Added ${product.name} to cart`)
+      setTopAlertActive(true)
+      clickAddToCard()
     } else {
       Alert.alert(
         "Error",
@@ -91,6 +142,17 @@ const ProductDetail = ({
       );
     }
   }
+
+  useEffect(() => {
+    getProduct({
+      productQuery: route.params.selectedProduct,
+      sellerQuery: route.params.selectedSeller
+    })
+    setRendered(true)
+    return () => {
+      setRendered(true)
+    };
+  }, []);
 
   useEffect(() => {
     getProduct({
@@ -119,7 +181,10 @@ const ProductDetail = ({
     !productLoading && rendered ? (
       product !== null && productImages.length > 0 ? (
         <>
-          <Header backLink={{component:'RestaurantDetail', options: {selectedSeller: route.params.selectedSeller }}} navigation={navigation}/>
+          <Header subtitle='Food' backLink={{component:'RestaurantDetail', options: {selectedSeller: route.params.selectedSeller }}} navigation={navigation}/>
+          <Animated.View style={[ styles.topAlert, { top: topAlertAnim }]}>
+            <Text style={styles.topAlertText}>{topAlertText}</Text>            
+          </Animated.View>
           <ScrollView>
             <ImageBackground 
               resizeMode='cover'
@@ -150,7 +215,6 @@ const ProductDetail = ({
                   width: 10,
                   height: 10,
                   borderRadius: 5,
-                  // marginHorizontal: 8,
                   backgroundColor: 'rgba(255, 255, 255, 0.92)'
                 }}
                 inactiveDotStyle={{
@@ -176,7 +240,7 @@ const ProductDetail = ({
               ) : undefined}
             </View>
           </ScrollView>
-          <Button style={productDetailsStyles.addToCartButton} onPress={() => addToOrder()}>Add To Cart</Button>
+          <Button style={productDetailsStyles.addToCartButton} onPress={() => {addToOrder()}}>Add To Cart</Button>
           {isAuthenticated && !user.groups.includes('rider') && !currentOrderLoading && currentOrder !== null && currentOrder.order_type === 'food' && currentOrder.order_items.length > 0 ? (
             <Ionicons style={[styles.foodCartButton, {bottom: 60}]} name="cart" size={28} color={"#ffffff"} onPress={() => setFoodCartActive(!foodCartActive)}/>
           ) : undefined}

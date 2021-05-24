@@ -1,6 +1,7 @@
-import { PROJECT_URL } from "@env"
 import axios from 'axios';
 import { Alert } from 'react-native'
+
+import { PROJECT_URL } from './siteConfig'
 console.log('logistics url', PROJECT_URL)
 
 import {
@@ -248,7 +249,7 @@ export const getCurrentOrder = ({ type, query, updateOnly }) => async (dispatch,
       payload: res.data,
     })
   } catch (err) {
-    console.log(err)
+    console.log('get current order error', err)
     dispatch({ type: CURRENT_ORDER_ERROR });
     dispatch({ type: AUTH_ERROR });
   }
@@ -428,9 +429,12 @@ export const foodCheckout = ({ formData, orderSeller, navigation }) => async (di
       distance_value: formData.distanceValue,
       duration_text: formData.durationText,
       duration_value: formData.durationValue,
+
+      promo_code: formData.promoCode
     }
     console.log(orderBody)
     const res = await axios.put(`${PROJECT_URL}/api/food_checkout/${orderSeller.id}/`, orderBody, tokenConfig(getState))
+    console.log(res.data)
     if (res.data.status === "okay") {
       dispatch({ type: CHECKOUT_SUCCESS })
       navigation.navigate('FoodPayment', { selectedSeller: orderSeller.name })
@@ -633,7 +637,7 @@ export const proceedWithCOD = ({ navigation, type, query, socket }) => async (di
       dispatch({ type: COMPLETE_ORDER_FAILED });
       Alert.alert(
         "Error",
-        "'You already reviewed that'",
+        res.data.msg,
         [
           {
             text: "Cancel",
@@ -642,13 +646,15 @@ export const proceedWithCOD = ({ navigation, type, query, socket }) => async (di
           { text: "OK" }
         ]
       );
+      console.log('type === food', type === 'food')
       if (type === 'food') {
+        console.log('navigate to RestaurantDetail')
         navigation.navigate('RestaurantDetail', { selectedSeller: res.data.seller_name_to_url })
       } else {
         navigation.navigate('Bookings')
       }
     }
-    // axios.post(`${PROJECT_URL}/api/new_order_update/`, { 'ref_code': res.data.ref_code }, tokenConfig(getState))
+    axios.post(`${PROJECT_URL}/api/new_order_update/`, { 'ref_code': res.data.ref_code }, tokenConfig(getState))
   } catch (error) {
     console.log(error)
     dispatch({ type: COMPLETE_ORDER_FAILED });

@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { PROJECT_URL } from "@env"
-console.log('ProductReview ENV', PROJECT_URL)
+import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux';
 import { useBackButton } from '../../common/BackButtonHandler';
 import PropTypes from 'prop-types'
+
+import { PROJECT_URL } from "../../../actions/siteConfig"
+console.log('ProductReview ENV', PROJECT_URL)
 
 import { Layout, Icon, Text, Button, Divider, Spinner, Input } from '@ui-kitten/components';
 import { Dimensions, View, StyleSheet, ScrollView, Image } from 'react-native'

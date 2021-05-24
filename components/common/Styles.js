@@ -4,10 +4,31 @@ let deviceWidth = Dimensions.get('window').width
 let deviceHeight = Dimensions.get('window').height
 
 export const styles = StyleSheet.create({
+  topAlert: {
+    zIndex:1,
+    position: 'absolute',
+    justifyContent: 'center',
+    backgroundColor: '#FAA634',
+    width: deviceWidth,
+    paddingBottom: 10,
+    paddingTop: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20
+  },
+  strikethrough: {
+    textDecorationLine: 'line-through',
+    textDecorationStyle: 'solid'
+  },
+  topAlertText: {
+    fontSize: 16,
+    fontFamily: 'Lato-Bold',
+    color: '#ffffff',
+    textAlign: 'center'
+  },
   hoverButton: {
     position: 'absolute',
     width: deviceWidth*.8,
-    bottom: 10,
+    bottom: 30,
     left: deviceWidth*.1
   },
   authCard: {
@@ -53,6 +74,20 @@ export const styles = StyleSheet.create({
     zIndex: 10,
     backgroundColor: '#000000',
     opacity: .50
+  },
+  loader: {
+    position: 'absolute',
+    height: deviceHeight,
+    width: deviceWidth,
+    padding: 0,
+    zIndex: 10,
+    backgroundColor: '#000000',
+    opacity: .50,
+    backgroundColor:'transparent',
+    opacity: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 11
   },
   backdrop: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

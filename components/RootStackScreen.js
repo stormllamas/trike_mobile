@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { PROJECT_URL } from "@env"
-console.log('RootStackScreen', PROJECT_URL)
 import PropTypes from 'prop-types'
+
+import { PROJECT_URL } from "../actions/siteConfig"
+console.log('RootStackScreen', PROJECT_URL)
 
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -29,7 +30,8 @@ const Root = ({
   setMenuToggler,
   logout,
   reroute,
-  navigation
+  navigation,
+  route
 }) => {
   
   const [selectedMenuIndex, setSelectedMenuIndex] = useState(new IndexPath(0));
@@ -123,6 +125,7 @@ const Root = ({
 
 
   useEffect(() => {
+    console.log('launch root stack', route.params)
     setMenuToggler(false)
   }, []);
 
@@ -152,7 +155,7 @@ const Root = ({
             />
           </View>
           <Menu
-            selectedIndex={selectedMenuIndex}
+            selectedIndex={new IndexPath(0)}
             onSelect={index => setSelectedMenuIndex(index)}>
             <MenuItem title='Home' accessoryLeft={() => <Ionicons size={22} name='home-outline'/>}/>
             <MenuItem title='My Bookings' accessoryLeft={() => <Ionicons size={22} name='cube-outline'/>} onPress={() => navigation.navigate('Bookings')}/>
@@ -168,7 +171,7 @@ const Root = ({
         <RootStack.Screen name="Food" component={Food}/>
         <RootStack.Screen name="Delivery" component={Delivery} />
       </RootStack.Navigator>
-      <BottomTabs navigation={navigation}/>
+      <BottomTabs navigation={navigation} screen={route.params.screen}/>
     </>
   )
 }

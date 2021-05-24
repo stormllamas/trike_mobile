@@ -7,7 +7,8 @@ import { BottomNavigation, BottomNavigationTab, Layout } from '@ui-kitten/compon
 
 const BottomTabs = ({
   auth: {current, all_subjects},
-  navigation
+  navigation,
+  screen
 }) => {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -22,6 +23,15 @@ const BottomTabs = ({
       // navigation.navigate('Delivery')
     }
   }
+
+  useEffect(() => {
+    console.log(screen)
+    if (screen == 'Food') {
+      setSelectedIndex(0)
+    } else if (screen == 'Delivery') {
+      setSelectedIndex(1)
+    }
+  }, [screen]);
 
   return (
     <Layout>

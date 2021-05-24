@@ -1,11 +1,11 @@
 import React, { useEffect, useState, Fragment } from 'react';
-import { PROJECT_URL } from "@env"
+import { PROJECT_URL } from "../../actions/siteConfig"
 console.log('ConfirmEmail ENV', PROJECT_URL)
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types'
 
-import { Icon, Layout, Text, Button, Card, Input } from '@ui-kitten/components';
+import { Layout, Text, Button, Card, Spinner } from '@ui-kitten/components';
 import { Alert, Dimensions, StyleSheet, Image, ScrollView, View, TouchableWithoutFeedback } from 'react-native'
 
 import { reroute, resendActivation } from '../../actions/auth';
@@ -20,7 +20,10 @@ const ConfirmEmail = ({
   navigation
 }) => {
 
+  const [loading, setLoading] = useState(false);
+
   const resendActivationClicked = async () => {
+    setLoading(true)
     const res = await resendActivation({ email: route.params.email })
     if (res.status === 'okay') {
       Alert.alert(
@@ -48,6 +51,7 @@ const ConfirmEmail = ({
         ]
       );
     }
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -61,6 +65,11 @@ const ConfirmEmail = ({
 
   return (
     <Layout level="2" style={{ minHeight: Dimensions.get('window').height, paddingBottom: 50 }}>
+      {loading && (
+        <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
+          <Spinner size='large'/>
+        </View>
+      )}
       <ScrollView>
         <Image
           style={[styles.tinyLogo, { marginTop: 50 }]}

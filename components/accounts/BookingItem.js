@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React from 'react'
 import { connect } from 'react-redux';
-import { PROJECT_URL } from "@env"
-console.log('BookingItem ENV', PROJECT_URL)
 import PropTypes from 'prop-types'
 
+import { PROJECT_URL } from "../../actions/siteConfig"
+console.log('BookingItem ENV', PROJECT_URL)
 
-import { Layout, Icon, Text, Button, Spinner, Card, Divider } from '@ui-kitten/components';
-import { Dimensions, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import { Text, Button, Divider } from '@ui-kitten/components';
+import { Dimensions, View, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import { InView } from 'react-native-intersection-observer'
 
 import Collapsible from 'react-native-collapsible';
@@ -130,7 +130,7 @@ const BookingItem = ({ ordersLoading, order, orders, index, getOrders, setOrder,
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={[styles.mute, { fontFamily: 'Lato-Bold', marginBottom:5 }]}>Shipping</Text>
-                <Text>₱ {order.ordered_shipping.toFixed(2)}</Text>
+                <Text style={[styles.mute]}>{order.promo_discount && <Text style={[styles.mute, styles.strikethrough]}>₱ {order.promo_discount ? (order.ordered_shipping+order.promo_discount).toFixed(2) : order.ordered_shipping.toFixed(2) }</Text>} ₱ {order.ordered_shipping.toFixed(2)}</Text>
               </View>
             </View>
           )}

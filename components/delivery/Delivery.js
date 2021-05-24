@@ -2,11 +2,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import axios from 'axios';
-import { GOOGLE_API_KEY } from "@env"
-console.log('Delivery url', GOOGLE_API_KEY)
 import { styles } from '../common/Styles'
 
-import { Layout, Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation, Spinner, Divider } from '@ui-kitten/components';
+import { GOOGLE_API_KEY } from "../../actions/siteConfig"
+console.log('Delivery url', GOOGLE_API_KEY)
+
+import { Layout, Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, CheckBox, TopNavigation, Spinner, Divider } from '@ui-kitten/components';
 import { Keyboard, Animated, Easing, Dimensions, Alert, View, TouchableHighlight, TouchableOpacity, Image, StyleSheet, ScrollView, Platform } from 'react-native'
 
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
@@ -75,14 +76,14 @@ const Delivery = ({
   const [modalActive, setModalActive] = useState('')
   const [modalAnim, setModalAnim] = useState(new Animated.Value(Dimensions.get('window').height))
 
-  const [pickupAddressBook, setPickupAddressBook] = useState(true)
+  const [pickupAddressBook, setPickupAddressBook] = useState(false)
   const [pickupAddressId, setPickupAddressId] = useState('');
   const [pickupAddressIndex, setPickupAddressIndex] = useState(new IndexPath(0));
   const [pickupLat, setPickupLat] = useState('');
   const [pickupLng, setPickupLng] = useState('');
   const [pickupAddress, setPickupAddress] = useState("Please set a pickup address");
   
-  const [deliveryAddressBook, setDeliveryAddressBook] = useState(true)
+  const [deliveryAddressBook, setDeliveryAddressBook] = useState(false)
   const [deliveryAddressId, setDeliveryAddressId] = useState('');
   const [deliveryAddressIndex, setDeliveryAddressIndex] = useState(new IndexPath(0));
   const [deliveryLat, setDeliveryLat] = useState('');
@@ -100,8 +101,10 @@ const Delivery = ({
   const [promoCodeRetrieved, setPromoCodeRetrieved] = useState('');
 
   const [personalDetailsActivated, setPersonalDetailsActivated] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const addressSelected = async ({ mode }) => {
+    setLoading(true)
     const addressInfo = await getAddress(mode === 'pickup' ? pickupAddressId : deliveryAddressId)
     if (mode === 'pickup') {
       setPickupLat(addressInfo.latitude)
@@ -138,6 +141,7 @@ const Delivery = ({
         setDelivery(Math.round(total))
       }
     }
+    setLoading(false)
     return async() => {
       if (mode === 'pickup') {
         setPickupLat(addressInfo.latitude)
@@ -326,34 +330,31 @@ const Delivery = ({
         setDelivery('')
       }
     }
-    return () => {
-      if (pickupAddressIndex.row > 0) {
-        user.addresses.forEach((address, index) => {
-          if (index == pickupAddressIndex.row-1) {
-            setPickupAddressId(address.id)
-          }
-        })
-      } else {
-        setPickupAddressId('')
-        setPickupLat('')
-        setPickupLng('')
-        setPickupAddress('')
-        setDistanceText('');
-        setDistanceValue('');
-        setDurationText('');
-        setDurationValue('');
-        setDelivery('')
-      }
-    }
+    // return () => {
+    //   if (pickupAddressIndex.row > 0) {
+    //     user.addresses.forEach((address, index) => {
+    //       if (index == pickupAddressIndex.row-1) {
+    //         setPickupAddressId(address.id)
+    //       }
+    //     })
+    //   } else {
+    //     if (modalActive !== 'pickup' && modalActive !== 'delivery') {
+    //       setPickupAddressId('')
+    //       setPickupLat('')
+    //       setPickupLng('')
+    //       setPickupAddress('')
+    //       setDistanceText('');
+    //       setDistanceValue('');
+    //       setDurationText('');
+    //       setDurationValue('');
+    //       setDelivery('')
+    //     }
+    //   }
+    // }
   }, [pickupAddressIndex])
   useEffect(() => {
     if (pickupAddressId) {
       addressSelected({mode:'pickup'})
-    }
-    return () => {
-      if (pickupAddressId) {
-        addressSelected({mode:'pickup'})
-      }
     }
   }, [pickupAddressId]);
 
@@ -376,33 +377,30 @@ const Delivery = ({
         setDelivery('')
       }
     }
-    return () => {
-      if(deliveryAddressIndex.row > 0) {
-        user.addresses.forEach((address, index) => {
-        if (index == deliveryAddressIndex.row-1) {
-          setDeliveryAddressId(address.id)
-        }})
-      } else {
-        setDeliveryAddressId('')
-        setDeliveryLat('')
-        setDeliveryLng('')
-        setDeliveryAddress('')
-        setDistanceText('');
-        setDistanceValue('');
-        setDurationText('');
-        setDurationValue('');
-        setDelivery('')
-      }
-    }
+    // return () => {
+    //   if(deliveryAddressIndex.row > 0) {
+    //     user.addresses.forEach((address, index) => {
+    //     if (index == deliveryAddressIndex.row-1) {
+    //       setDeliveryAddressId(address.id)
+    //     }})
+    //   } else {
+    //     if (modalActive !== 'pickup' && modalActive !== 'delivery') {
+    //       setDeliveryAddressId('')
+    //       setDeliveryLat('')
+    //       setDeliveryLng('')
+    //       setDeliveryAddress('')
+    //       setDistanceText('');
+    //       setDistanceValue('');
+    //       setDurationText('');
+    //       setDurationValue('');
+    //       setDelivery('')
+    //     }
+    //   }
+    // }
   }, [deliveryAddressIndex])
   useEffect(() => {
     if (deliveryAddressId) {
       addressSelected({mode:'delivery'})
-    }
-    return () => {
-      if (deliveryAddressId) {
-        addressSelected({mode:'delivery'})
-      }
     }
   }, [deliveryAddressId]);
   
@@ -417,6 +415,23 @@ const Delivery = ({
           useNativeDriver: false,
         }
       ).start();
+      if (modalActive === 'pickup') {
+        if (pickupAddress) {
+          ref.current?.setAddressText(pickupAddress)
+          setAutoCompleteText(pickupAddress)
+        } else {
+          ref.current?.setAddressText('')
+          setAutoCompleteText('')
+        }
+      } else if (modalActive === 'delivery') {
+        if (deliveryAddress) {
+          ref.current?.setAddressText(deliveryAddress)
+          setAutoCompleteText(deliveryAddress)
+        } else {
+          ref.current?.setAddressText('')
+          setAutoCompleteText('')
+        }
+      }
     } else {
       Animated.timing(
         modalAnim,
@@ -467,9 +482,23 @@ const Delivery = ({
       setDescription(currentOrder.description ? currentOrder.description : "")
     }
     return () => {
-      if (!currentOrderLoading && currentOrder !== null) {
-        setDescription(currentOrder.description ? currentOrder.description : "")
-      }
+    if (!currentOrderLoading && currentOrder !== null) {
+      // setPickupLat(currentOrder.loc1_latitude ? currentOrder.loc1_latitude : "")
+      // setPickupLng(currentOrder.loc1_longitude ? currentOrder.loc1_longitude : "")
+      // setPickupAddress(currentOrder.loc1_address ? currentOrder.loc1_address : "")
+      // setDeliveryLat(currentOrder.loc2_latitude ? currentOrder.loc2_latitude : "")
+      // setDeliveryLng(currentOrder.loc2_longitude ? currentOrder.loc2_longitude : "")
+      // setDeliveryAddress(currentOrder.loc2_address ? currentOrder.loc2_address : "")
+
+      setUnit(currentOrder.unit ? currentOrder.unit : "")
+      setWeight(currentOrder.weight ? currentOrder.weight : "")
+      setHeight(currentOrder.height ? currentOrder.height : "")
+      setWidth(currentOrder.width ? currentOrder.width : "")
+      setLength(currentOrder.length ? currentOrder.length : "")
+
+      setDescription(currentOrder.description ? currentOrder.description : "")
+      setRiderPaymentNeeded(currentOrder.rider_payment_needed)
+    }
     }
   }, [currentOrderLoading]);
 
@@ -503,19 +532,40 @@ const Delivery = ({
     }
   }, [])
 
+  useEffect(() => {
+    if (modalActive === 'pickup' || modalActive === 'delivery') {
+      if ((modalActive === 'pickup' && pickupLat && pickupLng) || (modalActive === 'delivery' && deliveryLat && deliveryLng)) {
+        mapRef.current?.animateCamera({
+          center: {
+            latitude: modalActive === 'pickup' ? parseFloat(pickupLat) : parseFloat(deliveryLat),
+            longitude: modalActive === 'pickup' ? parseFloat(pickupLng) : parseFloat(deliveryLng),
+            latitudeDelta: 1,
+            longitudeDelta: 1
+          },
+          zoom: 15
+        })
+      }
+    }
+  }, [pickupLat, pickupLng, deliveryLat, deliveryLng, modalActive])
+
   return (
     isAuthenticated && !user.groups.includes('rider') && (
-      !currentOrderLoading && currentOrder !== null && rendered && (
+      currentOrder !== null && rendered && (
         currentOrder.order_type === 'delivery' && (
           <Layout level="1" style={{flex: 1}}>
             <Header subtitle='Delivery' sideMenu={true}/>
+            {loading && (
+              <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
+                <Spinner size='large'/>
+              </View>
+            )}
             <ScrollView>
               <View style={styles.collapsibleWrapper}>
                 <View style={[styles.collapsibleHeader, { flexDirection: 'column' }]}>
                   <View style={{ flexDirection: 'row' }}>
                     <View style={deliveryStyles.deliveryPrompt}>
-                      <View style={{ flexDirection: 'row' }}>
-                        <Text category="h6" style={[ deliveryStyles.promptTitle ]}>Set Up Pickup</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+                        <Text category="h6" style={[ deliveryStyles.promptTitle, { color: '#1C8DFF' } ]}>Set Up Pickup</Text>
                       </View>
                       <Text style={[styles.mute, styles.small]}>Select or search where you want your parcel to be picked up</Text>
                     </View>
@@ -541,13 +591,13 @@ const Delivery = ({
                 }}>
                   <View style={[styles.collapsibleContent, styles.collapsibleHeader]}>
                     <Text category="h6" style={[styles.small, styles.mute, { fontFamily: 'Lato-Bold' }]}>Select from address book</Text>
-                    <Ionicons name={pickupAddressBook ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
+                    <Ionicons name={!pickupAddressBook ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
                   </View>
                 </TouchableHighlight>
-                <Collapsible collapsed={pickupAddressBook} duration={150} align="center">
+                <Collapsible collapsed={!pickupAddressBook} duration={150} align="center">
                   <View style={[styles.collapsibleContent]}>
                     <Select
-                      value={pickupAddressIndex.row > 0 ? user.addresses[pickupAddressIndex.row-1].name : '-Select an Address-'}
+                      value={pickupAddressIndex.row > 0 ? (user.addresses[pickupAddressIndex.row-1].name ? user.addresses[pickupAddressIndex.row-1].name : user.addresses[pickupAddressIndex.row-1].address) : '-Select an Address-'}
                       selectedIndex={pickupAddressIndex}
                       style={{ backgroundColor: 'white' }}
                       onSelect={index => setPickupAddressIndex(index)}>
@@ -567,19 +617,19 @@ const Delivery = ({
                   <View style={{ flexDirection: 'row' }}>
                     <View style={deliveryStyles.deliveryPrompt}>
                       <View style={{ flexDirection: 'row' }}>
-                        <Text category="h6" style={[ deliveryStyles.promptTitle ]}>Set Up Delivery</Text>
+                        <Text category="h6" style={[ deliveryStyles.promptTitle, { color: '#59CD5F' } ]}>Set Up Delivery</Text>
                       </View>
                       <Text style={[styles.mute, styles.small]}>Select or search where you want your parcel delivered</Text>
                     </View>
                     <View style={deliveryStyles.deliveryButtons}>
                       <Button
-                        style={[deliveryStyles.deliveryButton]}
+                        style={[deliveryStyles.deliveryButton ]}
                         size='small'
                         appearance='outline'
-                        status='info'
+                        status='success'
                         onPress={() => setModalActive('delivery')}
                       >
-                        <Ionicons name={"location"} size={14}/> Search Delivery
+                        <Ionicons name={"location"} size={14} style={{ color: '#59CD5F' }}/> Search Delivery
                       </Button>
                     </View>
                   </View>
@@ -593,13 +643,13 @@ const Delivery = ({
                 }}>
                   <View style={[styles.collapsibleContent, styles.collapsibleHeader]}>
                     <Text category="h6" style={[styles.small, styles.mute, { fontFamily: 'Lato-Bold' }]}>Select from address book</Text>
-                    <Ionicons name={deliveryAddressBook ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
+                    <Ionicons name={!deliveryAddressBook ? "chevron-down-outline" : "chevron-up-outline"} size={20}/>
                   </View>
                 </TouchableHighlight>
-                <Collapsible collapsed={deliveryAddressBook} duration={150} align="center">
+                <Collapsible collapsed={!deliveryAddressBook} duration={150} align="center">
                   <View style={[styles.collapsibleContent]}>
                     <Select
-                      value={deliveryAddressIndex.row > 0 ? user.addresses[deliveryAddressIndex.row-1].name : '-Select an Address-'}
+                      value={deliveryAddressIndex.row > 0 ? (user.addresses[deliveryAddressIndex.row-1].name ? user.addresses[deliveryAddressIndex.row-1].name : user.addresses[deliveryAddressIndex.row-1].address) : '-Select an Address-'}
                       selectedIndex={deliveryAddressIndex}
                       style={{ backgroundColor: 'white' }}
                       onSelect={index => setDeliveryAddressIndex(index)}>
@@ -613,7 +663,6 @@ const Delivery = ({
                   </View>
                 </Collapsible>
               </View>
-              
 
               <View style={styles.collapsibleWrapper}>
                 <View style={[styles.collapsibleHeader, { flexDirection: 'column' }]}>
@@ -629,6 +678,18 @@ const Delivery = ({
                     style={{ backgroundColor: 'white', marginTop: 10 }}
                   />
                   <Text style={[styles.small, {alignSelf: 'flex-end'}]}>{description.length}/4000</Text>
+                </View>
+              </View>
+
+              <View style={styles.collapsibleWrapper}>
+                <View style={[styles.collapsibleHeader, { flexDirection: 'column' }]}>
+                  <Text category="h6" style={[ deliveryStyles.promptTitle ]}>Rider Payment Needed?</Text>
+                  <Text style={[styles.mute, styles.small, {marginBottom: 10}]}>Does the rider need to pay for the parcel at the pickup location first?</Text>
+                  <CheckBox
+                    checked={riderPaymentNeeded}
+                    onChange={nextChecked => setRiderPaymentNeeded(nextChecked)}>
+                    {'Rider Payment Needed?'}
+                  </CheckBox>
                 </View>
               </View>
               
@@ -730,20 +791,27 @@ const Delivery = ({
               style={[ styles.hoverButton ]}
               // disabled={!vehicleChoice || !delivery || !lastName || !firstName || !contact || !email ? true : false}
               onPress={proceedToPayment}
-              status="success"
+              status={!vehicleChoice || !delivery || !lastName || !firstName || !contact || !email ? "" : "success"}
             >
               Confirm Booking
             </Button>
             <Text style={[deliveryStyles.checkoutFloatText, {fontFamily: 'Lato-Bold'}]}>{ !vehicleChoice || !delivery || !lastName || !firstName || !contact || !email ? '' : `${promoCodeSet && promoCodeRetrieved ? `₱${Math.round(delivery*(1-promoCodeRetrieved.delivery_discount)).toFixed(2)}` : `₱${delivery.toFixed(2)}`}` }</Text>
             <Animated.View style={[styles.superModal, { top: modalAnim, height: Dimensions.get('window').height-80  }]}>
+            {/* <Animated.View style={[styles.superModal, { top: modalAnim, height: Dimensions.get('window').height  }]}> */}
               <TopNavigation
                 accessoryLeft={() => <TopNavigationAction onPress={() => setModalActive('')} icon={props => <Icon {...props} name='arrow-back'/>}/>}
-                title={`Add address`}
+                title={modalActive === 'pickup' ? 'Set a Pickup Address' : 'Set a Delivery Address'}
               />
+              {loading && (
+                <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
+                  <Spinner size='large'/>
+                </View>
+              )}
               <GooglePlacesAutocomplete
                 ref={ref}
                 placeholder='Search'
                 onPress={async (data) => {
+                  setLoading(true)
                   const res = await locationGeocode({ placeId: data.place_id })
                   const lat = res.data.geometry.location.lat
                   const lng = res.data.geometry.location.lng
@@ -751,16 +819,21 @@ const Delivery = ({
                     setPickupLat(lat)
                     setPickupLng(lng)
                     setPickupAddress(res.data.formatted_address)
+                    // setPickupAddressIndex(new IndexPath(0))
+                    // setPickupAddressBook(false)
                     mapClicked({ mode: 'pickup', lat, lng })
                   } else if (modalActive === 'delivery') {
                     setDeliveryLat(lat)
                     setDeliveryLng(lng)
                     setDeliveryAddress(res.data.formatted_address)
+                    // setDeliveryAddressIndex(new IndexPath(0))
+                    // setDeliveryAddressBook(false)
                     mapClicked({ mode: 'delivery', lat, lng })
                   }
                   setAutoCompleteText(res.data.formatted_address)
                   ref.current?.setAddressText(res.data.formatted_address)
                   ref.current?.blur()
+                  setLoading(false)
                 }}
                 query={{
                   key: GOOGLE_API_KEY,
@@ -822,6 +895,7 @@ const Delivery = ({
                 maxZoomLevel={20}
                 // customMapStyle={['c90416c7434e6e52']}
                 onPress={async e => {
+                  setLoading(true)
                   const lat = e.nativeEvent.coordinate.latitude
                   const lng = e.nativeEvent.coordinate.longitude
                   const res = await locationGeocode({ latLng: { lat, lng } })
@@ -829,16 +903,21 @@ const Delivery = ({
                     setPickupLat(lat)
                     setPickupLng(lng)
                     setPickupAddress(res.data.formatted_address)
+                    setPickupAddressIndex(new IndexPath(0))
+                    setPickupAddressBook(false)
                     mapClicked({ mode: 'pickup', lat, lng })
                   } else if (modalActive === 'delivery') {
                     setDeliveryLat(lat)
                     setDeliveryLng(lng)
                     setDeliveryAddress(res.data.formatted_address)
+                    setDeliveryAddressIndex(new IndexPath(0))
+                    setDeliveryAddressBook(false)
                     mapClicked({ mode: 'delivery', lat, lng })
                   }
                   setAutoCompleteText(res.data.formatted_address)
                   ref.current?.setAddressText(res.data.formatted_address)
                   ref.current?.blur()
+                  setLoading(false)
                 }}
               >
                 {pickupLat && pickupLng ? (
@@ -851,6 +930,8 @@ const Delivery = ({
                       setPickupLat(lat)
                       setPickupLng(lng)
                       setPickupAddress(res.data.formatted_address)
+                      setPickupAddressIndex(new IndexPath(0))
+                      setPickupAddressBook(false)
                       mapClicked({ mode: 'pickup', lat, lng })
                       setAutoCompleteText(res.data.formatted_address)
                       ref.current?.setAddressText(res.data.formatted_address)
@@ -873,6 +954,8 @@ const Delivery = ({
                       setDeliveryLat(lat)
                       setDeliveryLng(lng)
                       setDeliveryAddress(res.data.formatted_address)
+                      setDeliveryAddressIndex(new IndexPath(0))
+                      setDeliveryAddressBook(false)
                       mapClicked({ mode: 'delivery', lat, lng })
                       setAutoCompleteText(res.data.formatted_address)
                       ref.current?.setAddressText(res.data.formatted_address)
@@ -925,7 +1008,7 @@ const deliveryStyles = StyleSheet.create({
   checkoutFloatText: {
     position: 'absolute',
     color: 'white',
-    bottom: 25,
+    bottom: 43,
     right: 58,
     zIndex: 10
   },

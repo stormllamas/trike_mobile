@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useBackButton } from '../common/BackButtonHandler';
 
 import { connect } from 'react-redux';
 import axios from 'axios';
 import PropTypes from 'prop-types'
 
-import { Icon, Text, Button, Spinner, Input, Modal, Card, Divider, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
+import { Icon, Text, Button, IndexPath, Select, SelectItem, Spinner, Input, Modal, Card, Divider, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 import { Keyboard, Animated, Easing, Dimensions, View, StyleSheet, ScrollView } from 'react-native'
 
 import MapView, { PROVIDER_GOOGLE, AnimatedRegion, Marker } from 'react-native-maps';
@@ -12,7 +13,7 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import Geolocation from 'react-native-geolocation-service'
 navigator.geolocation = require('react-native-geolocation-service');
 
-import { GOOGLE_API_KEY } from "@env"
+import { GOOGLE_API_KEY } from "../../actions/siteConfig"
 console.log('Profile ENV', GOOGLE_API_KEY)
 
 import { v4 as uuid } from 'uuid'
@@ -46,6 +47,7 @@ const Profile = ({
   const [lastName, setLastName] = useState(user ? (user.last_name ? user.last_name : '') : '');
   const [contact, setContact] = useState(user ? (user.contact ? user.contact : '') : '');
   const [gender, setGender] = useState(user ? (user.gender ? user.gender : '') : '');
+  const [selectedGenderIndex, setSelectedGenderIndex] = useState(new IndexPath(0));
   
   // States for new address
   const [addressmodalActive, setAddressmodalActive] = useState(false)
@@ -54,6 +56,7 @@ const Profile = ({
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [address, setAddress] = useState('');
+
   const [addressName, setAddressName] = useState('');
 
   // States for AutoComplete
@@ -68,6 +71,13 @@ const Profile = ({
 
   const ref = useRef();
   const mapRef = useRef();
+  
+  const handleBackButtonClick = () => {
+    // navigation.goBack()
+    navigation.navigate('Root', {screen: 'Food'})
+    return true
+  }
+  useBackButton(handleBackButtonClick)
 
   const addNewAddress = async () => {
     setUpdatingUser(true)
@@ -116,7 +126,7 @@ const Profile = ({
       first_name: firstName,
       last_name: lastName,
       contact: contact,
-      gender: gender
+      gender: selectedGenderIndex === 0 ? 'male' : 'female'
     }
     await updateUser(body)
     setEditingProfile(false)
@@ -127,7 +137,7 @@ const Profile = ({
     setFirstName(user.first_name)
     setLastName(user.last_name)
     setContact(user.contact)
-    setGender(user.gender)
+    setSelectedGenderIndex(!user.gender ? new IndexPath(0) : (user.gender === 'male' ? new IndexPath(0) : new IndexPath(1)))
     setEditingProfile(false)
   }
 
@@ -247,7 +257,7 @@ const Profile = ({
             <View style={styles.inputGroup}>
               <Input
                 value={editingProfile ? contact : user.contact}
-                onChangeText={nextValue => setPassword(nextValue)}
+                onChangeText={nextValue => setContact(nextValue)}
                 label='Contact'
                 placeholder='Enter Your Contact'
                 disabled={editingProfile ? false : true}
@@ -257,14 +267,17 @@ const Profile = ({
               />
             </View>
             <View style={{ marginBottom: 20 }}>
-              <Input
-                value={editingProfile ? gender : user.gender}
-                onChangeText={nextValue => setGender(nextValue)}
+              <Select
+                value={editingProfile ? (selectedGenderIndex.row == 0 ? 'Male' : 'Female') : (!user.gender ? 'Male' : (selectedGenderIndex.row == 0 ? 'Male' : 'Female'))}
+                selectedIndex={selectedGenderIndex}
                 disabled={editingProfile ? false : true}
                 label='Gender'
-                placeholder='Select a Gender'
                 accessoryLeft={props => <FontAwesome name="transgender" size={22} color={"#03A9F4"}/>}
-              />
+                placeholder='Select a Gender'
+                onSelect={index => setSelectedGenderIndex(index)}>
+                <SelectItem title='Male'/>
+                <SelectItem title='Female'/>
+              </Select>
             </View>
             <Divider style={{ marginBottom: 15 }}/>
             <Text style={{ fontSize: 22, fontWeight: '700', marginBottom: 15 }}>Saved Addresses</Text>
@@ -281,7 +294,7 @@ const Profile = ({
               ))}
             </View>
             <View style={{ marginBottom: 30 }}>
-              <Button style={ styles.addAddressButton } onPress={() => setAddressmodalActive(true)}><Ionicons name="add-outline" size={22}/> <Text style={{fontSize: 18, color: '#ffffff', fontWeight: '700' }}>Add an Address</Text></Button>
+              <Button style={ profileStyles.addAddressButton } onPress={() => setAddressmodalActive(true)}><Ionicons name="add-outline" size={16}/> <Text style={{fontSize: 16, color: '#ffffff', fontWeight: '700' }}>Add an Address</Text></Button>
             </View>
           </ScrollView>
           
@@ -340,7 +353,6 @@ const Profile = ({
                   border: 0,
                   backgroundColor: 'grey',
                 }
-                
               }}
             >
               <Ionicons name="close-circle" size={22} color={'#ECECEC'} style={{ position: 'absolute', zIndex: 9, right: 12, top: 12 }} onPress={() => {ref.current?.setAddressText(''), setAutoCompleteText('')}}/>

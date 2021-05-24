@@ -1,16 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux';
 import { useBackButton } from '../../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 
-import { Layout, Icon, Text, Button, Divider, Spinner, Card, Input } from '@ui-kitten/components';
-import { Dimensions, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
-import { IOScrollView } from 'react-native-intersection-observer'
-import Collapsible from 'react-native-collapsible';
+import { Layout, Icon, Text, Button, Divider, Spinner, Input } from '@ui-kitten/components';
+import { Dimensions, View, StyleSheet, ScrollView } from 'react-native'
 
 import Header from '../../layout/Header'
 
-import Ionicons from 'react-native-vector-icons/Ionicons'
 
 import { styles } from '../../common/Styles'
 

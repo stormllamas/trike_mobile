@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { connect } from 'react-redux';
-import { PROJECT_URL, DEBUG } from "@env"
-console.log('Bookings ENV', PROJECT_URL, DEBUG)
 import { useBackButton } from '../common/BackButtonHandler';
 import PropTypes from 'prop-types'
+
+import { PROJECT_URL, DEBUG } from "../../actions/siteConfig"
+console.log('Bookings ENV', PROJECT_URL, DEBUG)
 
 import { Layout, Icon, Modal, Text, Button, Spinner, Card, Toggle, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 import { Animated, Easing, Dimensions, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
@@ -55,7 +56,8 @@ const Bookings = ({
   const [socket, setSocket] = useState('')
   
   const handleBackButtonClick = () => {
-    navigation.goBack()
+    // navigation.goBack()
+    navigation.navigate('Root', {screen: 'Food'})
     return true
   }
   useBackButton(handleBackButtonClick)
@@ -106,13 +108,11 @@ const Bookings = ({
   useEffect(() => {
     let wsStart = 'ws://'
     let port = ''
-    console.log(DEBUG, typeof(DEBUG))
-    console.log(PROJECT_URL)
-    if (DEBUG === 'False') {
+    if (DEBUG === false) {
       wsStart = 'wss://'
       port = ':8001'
     }
-    let endpoint = wsStart + `${PROJECT_URL.replace('http://', '')}` + port
+    let endpoint = wsStart + `${PROJECT_URL.replace((DEBUG ? 'http://' : 'https://'), '')}` + port
     console.log(endpoint)
     setSocket(new WebSocket(endpoint+'/order_update/'))
   }, []);
@@ -320,7 +320,9 @@ const Bookings = ({
         <Card disabled={true}>
           <Text style={{ marginBottom: 20, fontSize: 18, fontWeight: '700', padding: 15 }}>Are you sure you want to delete your order?</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-            <Button style={{ backgroundColor: '#DB555F', borderColor: '#DB555F', marginRight: 10 }} onPress={() => {cancelOrder({ id: orderToDelete }), setDeleteModalActive(false)}}>DELETE</Button>
+            <Button
+              style={{ backgroundColor: '#DB555F', borderColor: '#DB555F', marginRight: 10 }}
+              onPress={() => {cancelOrder({ id: orderToDelete }), setDeleteModalActive(false)}}>DELETE</Button>
             <Button style={{ backgroundColor: '#1C8DFF', borderColor: '#1C8DFF', marginRight: 10 }} onPress={() => setDeleteModalActive(false)}>CANCEL</Button>
           </View>
         </Card>

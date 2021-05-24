@@ -1,7 +1,8 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import { PROJECT_URL } from "@env"
 import { connect } from 'react-redux';
+
+import { PROJECT_URL } from "../../actions/siteConfig"
 console.log('RestaurantDetail', PROJECT_URL)
 
 import { useBackButton } from '../common/BackButtonHandler';

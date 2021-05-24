@@ -10,10 +10,10 @@ import { setMenuToggler } from '../../actions/siteConfig'
 const Header = ({
   siteConfig: {sideBarToggled}, setMenuToggler,
   logout,
-  backLink,
   subtitle,
   sideMenu,
-  navigation
+  navigation,
+  backLink
 }) => {
 
   const [menuVisible, setMenuVisible] = useState(false);
@@ -37,6 +37,7 @@ const Header = ({
         alignment='center'
         title='Trike'
         subtitle={subtitle}
+        style={{ zIndex: 5 }}
         accessoryLeft={() => backLink ? (
           <TopNavigationAction icon={props => <Icon {...props} name='arrow-back' onPress={() => navigation.navigate(backLinkComponent, backLinkOptions)}/>}/>
         ) : (

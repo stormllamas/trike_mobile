@@ -2,7 +2,7 @@
 import React from 'react';
 import axios from 'axios';
 
-import { GOOGLE_API_KEY } from "@env"
+import { GOOGLE_API_KEY } from './siteConfig'
 console.log('google GOOGLE_API_KEY', GOOGLE_API_KEY)
 
 // Gets a latLng or placeId param
@@ -38,6 +38,7 @@ export const locationGeocode = async ({latLng, placeId}) => {
 export const getDistance = async ({ origin, destination }) => {
   try {
     const res = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${GOOGLE_API_KEY}`)
+    console.log(res.data)
     if (res.data.status === 'OK' && res.data.rows[0].elements[0].distance) {
       return {
         status: 'ok',

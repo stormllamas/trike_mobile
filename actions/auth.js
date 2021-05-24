@@ -14,8 +14,9 @@ import {
 } from '../actions/types';
 
 import { Alert } from "react-native";
-import { PROJECT_URL } from "@env"
 import axios from 'axios';
+
+import { PROJECT_URL } from "./siteConfig"
 console.log('auth url', PROJECT_URL)
 
 
@@ -111,6 +112,7 @@ export const signup = ({first_name, last_name, username, email, password}) => as
 
   try {
     const res = await axios.post(`${PROJECT_URL}/api/auth/signup`, body)
+    console.log(res.data)
     if (res.data.status === "okay") {
       dispatch({ type: SIGNUP_SUCCESS })
       return {

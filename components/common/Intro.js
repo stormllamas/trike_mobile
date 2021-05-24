@@ -1,13 +1,14 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { connect } from 'react-redux';
-import { PROJECT_URL } from "@env"
-console.log('Intro ENV', PROJECT_URL)
 import PropTypes from 'prop-types'
+
+import { PROJECT_URL } from "../../actions/siteConfig"
+console.log('Intro ENV', PROJECT_URL)
 
 import { styles } from '../common/Styles'
 
 import { Layout, Spinner } from '@ui-kitten/components';
-import { View, Dimensions, StyleSheet, Image } from 'react-native'
+import { Image } from 'react-native'
 
 import { reroute } from '../../actions/auth'
 

@@ -35,8 +35,9 @@ const DeliveryPayment = ({
   const [socket, setSocket] = useState('')
 
   const [otherDetails, setOtherDetails] = useState(false)
-  const [orderSummaryActivated, setOrderSummaryActivated] = useState(false)
   const [paymentOptionsActivated, setPaymentOptionsActivated] = useState(false)
+
+  const [processing, setProcessing] = useState(false)
 
   const handleBackButtonClick = () => {
     navigation.goBack()
@@ -57,7 +58,12 @@ const DeliveryPayment = ({
   return (
     isAuthenticated && currentOrder ? (
       <>
-        <Header backLink={{component:'Root', options: {screen : 'Food'}}} subtitle='Delivery Checkout' navigation={navigation}/>
+        <Header backLink={{component:'Root', options: {screen : 'Delivery'}}} subtitle='Delivery Checkout' navigation={navigation}/>
+        {processing && (
+          <View style={styles.loader}>
+            <Spinner size='large'/>
+          </View>
+        )}
         <ScrollView>
           <View style={styles.boxWithShadowContainer}>
             <View style={ styles.boxWithShadow }>
@@ -101,11 +107,14 @@ const DeliveryPayment = ({
               <Collapsible collapsed={paymentOptionsActivated} duration={150} align="center">
                 <View style={styles.boxBody}>
                   <Button style={foodPaymentStyles.CODButton} onPress={() => {
-                    proceedWithCOD({
-                      type: 'delivery',
-                      navigation,
-                      // socket: socket,
-                    })
+                    if (!processing) {
+                      setProcessing(true)
+                      proceedWithCOD({
+                        type: 'delivery',
+                        navigation,
+                        // socket: socket,
+                      })
+                    }
                   }}>Proceed with COD</Button>
                 </View>
               </Collapsible>

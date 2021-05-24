@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Fragment } from 'react';
-import { PROJECT_URL } from "@env"
+import { PROJECT_URL } from "../../actions/siteConfig"
 console.log('Login ENV', PROJECT_URL)
 
 import { connect } from 'react-redux';
@@ -40,7 +40,7 @@ const Login = ({
     if(email && password) {
       setLoggingIn(true)
       await login({
-        email,
+        email: email.trim(),
         password,
       })
       setLoggingIn(false)
@@ -58,7 +58,7 @@ const Login = ({
 
   return (
     <Layout level="2" style={{ minHeight: Dimensions.get('window').height, paddingBottom: 50 }}>
-      {userLoading || loggingIn && (
+      {!userLoading || loggingIn && (
         <View style={[styles.overlay, {backgroundColor:'transparent', opacity: 1, alignItems: 'center', justifyContent: 'center', zIndex: 11}]}>
           <Spinner size='large'/>
         </View>
@@ -73,6 +73,7 @@ const Login = ({
           <View style={[styles.inputGroup]}>
             <Input
               value={email}
+              onBlur={() => setEmail(email.trim())}
               label='Email'
               placeholder='Enter Your Email'
               onChangeText={nextValue => setEmail(nextValue)}

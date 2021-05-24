@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { connect } from 'react-redux';
-import { PROJECT_URL } from "@env"
-console.log('FoodPayment ENV', PROJECT_URL)
 import { useBackButton } from '../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 
+import { PROJECT_URL } from "../../actions/siteConfig"
+console.log('FoodPayment ENV', PROJECT_URL)
 
-import { Icon, Text, Button, Spinner, Card } from '@ui-kitten/components';
+import { Text, Button, Spinner } from '@ui-kitten/components';
 import { Dimensions, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
 
 import Collapsible from 'react-native-collapsible';
@@ -51,6 +51,8 @@ const FoodPayment = ({
   const [personalDetailsActivated, setPersonalDetailsActivated] = useState(false)
   const [orderSummaryActivated, setOrderSummaryActivated] = useState(false)
   const [paymentOptionsActivated, setPaymentOptionsActivated] = useState(false)
+
+  const [processing, setProcessing] = useState(false)
 
   const handleBackButtonClick = () => {
     navigation.goBack()
@@ -102,6 +104,11 @@ const FoodPayment = ({
     isAuthenticated && !currentOrderLoading && currentOrder ? (
       <>
         <Header subtitle='Food Checkout' backLink={{component:'RestaurantDetail', options: {selectedSeller: route.params.selectedSeller }}} navigation={navigation}/>
+        {processing && (
+          <View style={styles.loader}>
+            <Spinner size='large'/>
+          </View>
+        )}
         <ScrollView>
           <View style={styles.boxWithShadowContainer}>
             <View style={ styles.boxWithShadow }>
@@ -124,7 +131,7 @@ const FoodPayment = ({
                 </View>
                 <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
                   <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Shipping</Text>
-                  <Text style={[styles.mute]}>₱ {currentOrder.shipping.toFixed(2)}</Text>
+                  <Text style={[styles.mute]}>₱ {currentOrder.shipping.toFixed(2)} {currentOrder.promo_discount && <Text style={[styles.mute, styles.strikethrough]}>₱ {currentOrder.promo_discount ? (currentOrder.shipping+currentOrder.promo_discount).toFixed(2) : currentOrder.shipping.toFixed(2) }</Text>}</Text>
                 </View>
                 <View style={{ borderColor: '#EAECF1', borderTopWidth: 1, paddingVertical: 5 }}>
                   <Text style={{ fontFamily: 'Lato-Bold', marginBottom:5 }}>Order Total</Text>
@@ -145,12 +152,14 @@ const FoodPayment = ({
               <Collapsible collapsed={paymentOptionsActivated} duration={150} align="center">
                 <View style={styles.boxBody}>
                   <Button style={foodPaymentStyles.CODButton} onPress={() => {
-                    proceedWithCOD({
-                      navigation,
-                      type: 'food',
-                      query: `?order_seller=${currentOrder.seller.id}`,
-                      // socket: socket,
-                    })
+                    if (!processing) {
+                      proceedWithCOD({
+                        navigation,
+                        type: 'food',
+                        query: `?order_seller=${currentOrder.seller.id}`,
+                        // socket: socket,
+                      })
+                    }
                   }}>Proceed with COD</Button>
                 </View>
               </Collapsible>
