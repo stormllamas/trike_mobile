@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types'
 
 import { PROJECT_URL } from "../../actions/siteConfig"
-console.log('BookingItem ENV', PROJECT_URL)
 
 import { Text, Button, Divider } from '@ui-kitten/components';
 import { Dimensions, View, Image, StyleSheet, TouchableOpacity } from 'react-native'

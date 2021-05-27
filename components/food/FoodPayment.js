@@ -4,7 +4,6 @@ import { useBackButton } from '../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 
 import { PROJECT_URL } from "../../actions/siteConfig"
-console.log('FoodPayment ENV', PROJECT_URL)
 
 import { Text, Button, Spinner } from '@ui-kitten/components';
 import { Dimensions, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'

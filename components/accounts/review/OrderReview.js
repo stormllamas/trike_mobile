@@ -80,14 +80,6 @@ const OrderReview = ({
     }
   }, []);
 
-  // useEffect(() => {
-  //   console.log('----------------')
-  //   console.log(orderLoading)
-  //   console.log(order)
-  //   console.log(order.id)
-  //   console.log(route.params.orderId)
-  // }, [orderLoading, order]);
-
   return (
     isAuthenticated ? (
       !orderLoading && (order ? order.id === route.params.orderId : false) ? (

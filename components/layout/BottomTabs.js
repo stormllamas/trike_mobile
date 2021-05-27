@@ -25,7 +25,6 @@ const BottomTabs = ({
   }
 
   useEffect(() => {
-    console.log(screen)
     if (screen == 'Food') {
       setSelectedIndex(0)
     } else if (screen == 'Delivery') {

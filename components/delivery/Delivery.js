@@ -5,7 +5,6 @@ import axios from 'axios';
 import { styles } from '../common/Styles'
 
 import { GOOGLE_API_KEY } from "../../actions/siteConfig"
-console.log('Delivery url', GOOGLE_API_KEY)
 
 import { Layout, Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, CheckBox, TopNavigation, Spinner, Divider } from '@ui-kitten/components';
 import { Keyboard, Animated, Easing, Dimensions, Alert, View, TouchableHighlight, TouchableOpacity, Image, StyleSheet, ScrollView, Platform } from 'react-native'

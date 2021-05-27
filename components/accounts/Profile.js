@@ -14,7 +14,6 @@ import Geolocation from 'react-native-geolocation-service'
 navigator.geolocation = require('react-native-geolocation-service');
 
 import { GOOGLE_API_KEY } from "../../actions/siteConfig"
-console.log('Profile ENV', GOOGLE_API_KEY)
 
 import { v4 as uuid } from 'uuid'
 
@@ -209,8 +208,6 @@ const Profile = ({
     })
   }, [userLoading]);
 
-  const trikeURL = 'https://www.trike.com.ph'
-
   return (
     <>
       <Header subtitle='My Profile' navigation={navigation}/>
@@ -377,7 +374,6 @@ const Profile = ({
                 let lat = e.nativeEvent.coordinate.latitude
                 let lng = e.nativeEvent.coordinate.longitude
                 const res = await locationGeocode({ latLng: { lat, lng } })
-                console.log(res.data)
                 setLatitude(lat)
                 setLongitude(lng)
                 setAddress(res.data.formatted_address)

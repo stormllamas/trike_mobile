@@ -3,7 +3,6 @@ import { Icon, Text, Card } from '@ui-kitten/components';
 import { View, Image } from 'react-native'
 
 import { PROJECT_URL } from "../../actions/siteConfig"
-console.log('RestaurantProduct', PROJECT_URL)
 
 import PropTypes from 'prop-types'
 

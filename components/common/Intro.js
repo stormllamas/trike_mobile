@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types'
 
 import { PROJECT_URL } from "../../actions/siteConfig"
-console.log('Intro ENV', PROJECT_URL)
 
 import { styles } from '../common/Styles'
 

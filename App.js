@@ -22,6 +22,9 @@ import Intro from './components/common/Intro'
 import Login from './components/accounts/Login'
 import Signup from './components/accounts/Signup'
 import ConfirmEmail from './components/accounts/ConfirmEmail'
+import PasswordReset from './components/accounts/PasswordReset'
+import Security from './components/accounts/Security'
+
 import Profile from './components/accounts/Profile'
 import Bookings from './components/accounts/Bookings'
 import OrderReview from './components/accounts/review/OrderReview'
@@ -81,6 +84,14 @@ const App = () => {
             <Stack.Screen
               name="ConfirmEmail"
               component={ConfirmEmail}
+            />
+            <Stack.Screen
+              name="PasswordReset"
+              component={PasswordReset}
+            />
+            <Stack.Screen
+              name="Security"
+              component={Security}
             />
             <Stack.Screen
               name="Profile"

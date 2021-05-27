@@ -2,7 +2,6 @@ import axios from 'axios';
 import { Alert } from 'react-native'
 
 import { PROJECT_URL } from './siteConfig'
-console.log('logistics url', PROJECT_URL)
 
 import {
   CATEGORIES_LOADING, GET_CATEGORIES,
@@ -312,7 +311,6 @@ export const addOrderItem = ({ productId, sellerID }) => async (dispatch, getSta
   }
   try {
     const res = await axios.post(`${PROJECT_URL}/api/order_item/`, body, tokenConfig(getState))
-    console.log(res.data)
     await dispatch(getCurrentOrder({
       type: 'food',
       query: `?order_seller=${sellerID}`,
@@ -432,9 +430,7 @@ export const foodCheckout = ({ formData, orderSeller, navigation }) => async (di
 
       promo_code: formData.promoCode
     }
-    console.log(orderBody)
     const res = await axios.put(`${PROJECT_URL}/api/food_checkout/${orderSeller.id}/`, orderBody, tokenConfig(getState))
-    console.log(res.data)
     if (res.data.status === "okay") {
       dispatch({ type: CHECKOUT_SUCCESS })
       navigation.navigate('FoodPayment', { selectedSeller: orderSeller.name })
@@ -646,9 +642,7 @@ export const proceedWithCOD = ({ navigation, type, query, socket }) => async (di
           { text: "OK" }
         ]
       );
-      console.log('type === food', type === 'food')
       if (type === 'food') {
-        console.log('navigate to RestaurantDetail')
         navigation.navigate('RestaurantDetail', { selectedSeller: res.data.seller_name_to_url })
       } else {
         navigation.navigate('Bookings')

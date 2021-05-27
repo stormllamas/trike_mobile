@@ -4,7 +4,6 @@ import { useBackButton } from '../../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 
 import { PROJECT_URL } from "../../../actions/siteConfig"
-console.log('ProductReview ENV', PROJECT_URL)
 
 import { Layout, Icon, Text, Button, Divider, Spinner, Input } from '@ui-kitten/components';
 import { Dimensions, View, StyleSheet, ScrollView, Image } from 'react-native'

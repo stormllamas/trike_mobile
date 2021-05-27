@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { useBackButton } from '../common/BackButtonHandler';
 
 import { PROJECT_URL } from "../../actions/siteConfig"
-console.log('ProductDetail ENV', PROJECT_URL)
 
 import FoodCart from './FoodCart'
 import RestaurantProduct from './RestaurantProduct'

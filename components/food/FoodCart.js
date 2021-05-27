@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import axios from 'axios';
 
 import { GOOGLE_API_KEY, PROJECT_URL } from "../../actions/siteConfig"
-console.log('FoodCart ENV', GOOGLE_API_KEY, PROJECT_URL)
 
 import { Icon, Text, Button, TopNavigationAction, Input, IndexPath, Select, SelectItem, TopNavigation, Spinner, Divider } from '@ui-kitten/components';
 import { Animated, Easing, Alert, Dimensions, View, TouchableHighlight, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native'
@@ -133,11 +132,9 @@ const FoodCart = ({
   const addressSelected = async () => {
     setLoading(true)
     const addressInfo = await getAddress(deliveryAddressId)
-    console.log('addressInfo', addressInfo)
     const origin = `${pickupLat},${pickupLng}`;
     const destination = `${addressInfo.latitude},${addressInfo.longitude}`;
     const res = await getDistance({ origin, destination })
-    console.log(res.data)
 
     setDeliveryLat(addressInfo.latitude)
     setDeliveryLng(addressInfo.longitude)

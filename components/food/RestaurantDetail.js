@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 
 import { PROJECT_URL } from "../../actions/siteConfig"
-console.log('RestaurantDetail', PROJECT_URL)
 
 import { useBackButton } from '../common/BackButtonHandler';
 

@@ -4,7 +4,6 @@ import { useBackButton } from '../common/BackButtonHandler';
 import PropTypes from 'prop-types'
 
 import { PROJECT_URL, DEBUG } from "../../actions/siteConfig"
-console.log('Bookings ENV', PROJECT_URL, DEBUG)
 
 import { Layout, Icon, Modal, Text, Button, Spinner, Card, Toggle, TopNavigation, TopNavigationAction } from '@ui-kitten/components';
 import { Animated, Easing, Dimensions, View, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
@@ -113,7 +112,6 @@ const Bookings = ({
       port = ':8001'
     }
     let endpoint = wsStart + `${PROJECT_URL.replace((DEBUG ? 'http://' : 'https://'), '')}` + port
-    console.log(endpoint)
     setSocket(new WebSocket(endpoint+'/order_update/'))
   }, []);
 

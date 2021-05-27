@@ -1,6 +1,5 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { PROJECT_URL } from "../../actions/siteConfig"
-console.log('ConfirmEmail ENV', PROJECT_URL)
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types'

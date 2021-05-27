@@ -9,7 +9,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { styles } from './common/Styles'
 
-import { Menu, MenuGroup, MenuItem, IndexPath, Button, Modal, Card, Text } from '@ui-kitten/components';
+import { Menu, MenuGroup, MenuItem, IndexPath, Button, Modal, Card, Text, Divider } from '@ui-kitten/components';
 import { BackHandler, Animated, Easing, Dimensions, View, Image, TouchableWithoutFeedback } from 'react-native'
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -125,7 +125,6 @@ const Root = ({
 
 
   useEffect(() => {
-    console.log('launch root stack', route.params)
     setMenuToggler(false)
   }, []);
 
@@ -157,13 +156,15 @@ const Root = ({
           <Menu
             selectedIndex={new IndexPath(0)}
             onSelect={index => setSelectedMenuIndex(index)}>
-            <MenuItem title='Home' accessoryLeft={() => <Ionicons size={22} name='home-outline'/>}/>
+            <MenuItem title='Home' accessoryLeft={() => <Ionicons size={22} name='home-outline'/>} onPress={() => setMenuActive(false)}/>
             <MenuItem title='My Bookings' accessoryLeft={() => <Ionicons size={22} name='cube-outline'/>} onPress={() => navigation.navigate('Bookings')}/>
-            <MenuGroup title='Account'>
-              <MenuItem title='My Profile' accessoryLeft={() => <Ionicons size={22} name='person-circle-outline'/>} onPress={() => navigation.navigate('Profile')}/>
-              {/* <MenuItem title='Security' accessoryLeft={() => <Ionicons size={22} name='shield-outline'/>}/> */}
-              <MenuItem title='Logout' accessoryLeft={() => <Ionicons size={22} name='log-out-outline'/>} onPress={() => {logout()}}/>
-            </MenuGroup>
+            <Divider/>
+            <MenuItem title='Account'/>
+            <MenuItem title='My Profile' accessoryLeft={() => <Ionicons size={22} name='person-circle-outline'/>} onPress={() => navigation.navigate('Profile')}/>
+            <MenuItem title='Security' accessoryLeft={() => <Ionicons size={22} name='shield-outline'/>} onPress={() => navigation.navigate('Security')}/>
+            <MenuItem title='Logout' accessoryLeft={() => <Ionicons size={22} name='log-out-outline'/>} onPress={() => {logout()}}/>
+            {/* <MenuGroup title='Account'>
+            </MenuGroup> */}
           </Menu>
         </>
       </Animated.View>

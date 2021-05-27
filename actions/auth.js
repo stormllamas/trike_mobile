@@ -17,7 +17,6 @@ import { Alert } from "react-native";
 import axios from 'axios';
 
 import { PROJECT_URL } from "./siteConfig"
-console.log('auth url', PROJECT_URL)
 
 
 export const reroute = ({type, navigation, userLoading, isAuthenticated}) => async dispatch => {
@@ -112,7 +111,6 @@ export const signup = ({first_name, last_name, username, email, password}) => as
 
   try {
     const res = await axios.post(`${PROJECT_URL}/api/auth/signup`, body)
-    console.log(res.data)
     if (res.data.status === "okay") {
       dispatch({ type: SIGNUP_SUCCESS })
       return {
@@ -184,34 +182,6 @@ export const socialSignin = ({first_name, last_name, email, facebook_id}, histor
       classes: 'orange'
     });
     dispatch({ type: SIGNUP_FAIL });
-  }
-}
-
-export const activate = (uidb64, token, history) => async dispatch => {
-  dispatch({ type: ACTIVATING_USER })
-  const body = {
-    uidb64,
-    token,
-  };
-  const res = await axios.post(`${PROJECT_URL}/api/auth/activate`, body)
-  if (res.data.status === 'okay') {
-    dispatch({
-      type: USER_ACTIVATED,
-      payload: res.data
-    })
-    M.toast({
-      html: 'You have successfully activated your account!',
-      displayLength: 3500,
-      classes: 'green'
-    });
-    history.push('/')
-  } else {
-    M.toast({
-      html: 'Activation error',
-      displayLength: 3500,
-      classes: 'red'
-    });
-    dispatch({ type: ACTIVATION_FAILED });
   }
 }
 
@@ -309,7 +279,7 @@ export const deleteAddress = id => async (dispatch, getState) => {
 
 // Update Password
 export const updatePassword = (old_password, new_password) => async (dispatch, getState) => {;
-  dispatch({ type: USER_LOADING })
+  // dispatch({ type: USER_LOADING })
   const body = {
     old_password,
     new_password,
@@ -319,35 +289,44 @@ export const updatePassword = (old_password, new_password) => async (dispatch, g
     const res = await axios.put(`${PROJECT_URL}/api/auth/change_password`, body, tokenConfig(getState))
     if (res.data.status === 'okay') {
       dispatch({ type: PASSWORD_UPDATE })
-      M.toast({
-        html: res.data.message,
-        displayLength: 3500,
-        classes: 'green',
-      });
+      Alert.alert(
+        "Success!",
+        res.data.message,
+        [
+          { text: "OK" }
+        ],
+        { cancelable: true }
+      )
       return 'okay'
     } else {
       dispatch({ type: UPDATE_ERROR })
-      M.toast({
-        html: res.data.message,
-        displayLength: 3500,
-        classes: 'red',
-      });
+      Alert.alert(
+        "Error",
+        res.data.message,
+        [
+          { text: "OK" }
+        ],
+        { cancelable: true }
+      )
       return 'wrong password'
     }
   } catch (err) {
     dispatch({ type: UPDATE_ERROR })
-    M.toast({
-      html: 'Session timed out. Please login again.',
-      displayLength: 3500,
-      classes: 'red',
-    });
+    Alert.alert(
+      "Error",
+      'Session timed out. Please login again.',
+      [
+        { text: "OK" }
+      ],
+      { cancelable: true }
+    )
     return 'error'
   }
 }
 
 // Request Password Reset
 export const requestPasswordReset = (email) => async (dispatch, getState) => {;
-  dispatch({ type: REQUEST_LOADING })
+  // dispatch({ type: REQUEST_LOADING })
   const body = {
     email
   }
@@ -355,28 +334,37 @@ export const requestPasswordReset = (email) => async (dispatch, getState) => {;
   try {
     const res = await axios.post(`${PROJECT_URL}/api/auth/request_password_reset`, body)
     if (res.data.status === 'okay') {
-      M.toast({
-        html: res.data.msg,
-        displayLength: 3500,
-        classes: 'green',
-      });
+      Alert.alert(
+        "Success!",
+        res.data.msg,
+        [
+          { text: "OK" }
+        ],
+        { cancelable: true }
+      )
       dispatch({ type: REQUEST_PROCESSED })
       return 'okay'
     } else {
-      M.toast({
-        html: res.data.msg,
-        displayLength: 3500,
-        classes: 'red',
-      });
+      Alert.alert(
+        "Error",
+        res.data.msg,
+        [
+          { text: "OK" }
+        ],
+        { cancelable: true }
+      )
       dispatch({ type: REQUEST_PROCESSED })
       return 'error'
     }
   } catch (err) {
-    M.toast({
-      html: res.data.msg,
-      displayLength: 3500,
-      classes: 'red',
-    });
+    Alert.alert(
+      "Error",
+      res.data.msg,
+      [
+        { text: "OK" }
+      ],
+      { cancelable: true }
+    )
     dispatch({ type: REQUEST_PROCESSED })
     return 'error'
   }
