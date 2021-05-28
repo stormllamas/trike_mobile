@@ -174,13 +174,15 @@ export const socialSignin = ({first_name, last_name, email, facebook_id}, histor
       type: SOCIAL_AUTH_SUCCESS,
       payload: res.data
     })
-    history.push('/')
   } catch (err) {
-    M.toast({
-      html: 'Authentication error',
-      displayLength: 3500,
-      classes: 'orange'
-    });
+    Alert.alert(
+      "Error",
+      'Authentication error',
+      [
+        { text: "OK" }
+      ],
+      { cancelable: true }
+    )
     dispatch({ type: SIGNUP_FAIL });
   }
 }
@@ -396,11 +398,14 @@ export const resetPassword = (uidb64, token, newPassword, history) => async disp
   };
   const res = await axios.put(`${PROJECT_URL}/api/auth/reset_password`, body)
   if (res.data.status === 'okay') {
-    M.toast({
-      html: 'Password reset successful',
-      displayLength: 3500,
-      classes: 'green',
-    });
+    Alert.alert(
+      "Success",
+      'Password reset successful',
+      [
+        { text: "OK" }
+      ],
+      { cancelable: true }
+    )
     dispatch({ type: PASSWORD_RESET_DONE })
     history.push('/login')
   } else {

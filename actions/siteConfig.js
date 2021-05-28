@@ -1,10 +1,10 @@
 import { SITE_LOADING, SITE_LOADED, SET_SIDEBAR_TOGGLER } from './types'
 import axios from 'axios';
 
-// export const PROJECT_URL = 'https://trike.com.ph'
-export const PROJECT_URL = 'http://192.168.1.21:8000'
+export const PROJECT_URL = 'https://trike.com.ph'
+// export const PROJECT_URL = 'http://192.168.1.21:8000'
 export const GOOGLE_API_KEY = 'AIzaSyBi8DvnA6CTed6XFHBnbXggQG1Ry7YhktA'
-export const DEBUG = true
+export const DEBUG = false
 
 export const loadSite = () => async dispatch => {
   dispatch({ type: SITE_LOADING });
